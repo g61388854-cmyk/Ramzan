@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-node
+*.local
+.DS_Store
+.vite
+_verify.mjs
+_interact.mjs
