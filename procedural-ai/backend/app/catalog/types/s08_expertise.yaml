@@ -1,0 +1,260 @@
+# Раздел 4.8. Экспертизы и специалисты
+documents:
+  - code: expertise_order
+    title: "Постановление о назначении судебной экспертизы"
+    section: expertise
+    kind: resolution
+    author: "Следователь"
+    stages: [check, investigation]
+    specializations: [cyber, drugs, economic, person_harm]
+    keywords: [назначение экспертизы, экспертиза, эксперт, вопросы эксперту]
+    legal_bases:
+      - {key: "upk:195", reason: "Порядок назначения судебной экспертизы; содержание постановления (ч. 1 ст. 195 УПК РФ)"}
+      - {key: "upk:199", reason: "Порядок направления материалов для производства экспертизы"}
+      - {key: "upk:57", reason: "Права и обязанности эксперта"}
+      - {key: "upk:196", reason: "Обязательное назначение судебной экспертизы", mandatory: false}
+      - {key: "fz_gsed:1", reason: "Государственная судебно-экспертная деятельность", mandatory: false}
+    warnings:
+      - "С постановлением необходимо ознакомить подозреваемого (обвиняемого), защитника, потерпевшего, представителя и разъяснить права, предусмотренные ст. 198 УПК РФ (ч. 3 ст. 195 УПК РФ)."
+      - "Помещение лица в медицинскую организацию для производства судебно-медицинской или судебно-психиатрической экспертизы осуществляется по судебному решению (ч. 2 ст. 29 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: expertise_type, label: "Вид (род) судебной экспертизы", type: text, required: true, help: "Например: судебно-медицинская, почерковедческая, компьютерно-техническая"}
+      - {key: grounds, label: "Основания назначения экспертизы (обстоятельства и необходимость специальных знаний)", type: textarea, required: true, narrative: true}
+      - {key: performer_kind, label: "Кому поручается производство", type: select, required: true, options: ["экспертному учреждению", "лицу, не являющемуся сотрудником экспертного учреждения"]}
+      - {key: institution, label: "Наименование экспертного учреждения", type: text, required: true, condition: "performer_kind == 'экспертному учреждению'"}
+      - {key: expert, label: "Эксперт (вне экспертного учреждения)", type: participant, participant_role: "expert", required: true, condition: "performer_kind == 'лицу, не являющемуся сотрудником экспертного учреждения'"}
+      - {key: questions, label: "Вопросы эксперту", type: list, required: true}
+      - {key: materials, label: "Объекты и материалы, предоставляемые в распоряжение эксперта", type: list, required: true}
+      - {key: permissions, label: "Разрешения эксперту (на повреждение или полное уничтожение объектов и т. п.)", type: textarea}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о назначении " ~ (raw.expertise_type or "судебной") ~ " экспертизы") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.grounds }}</p>
+      <p>Руководствуясь ст. 195 и 199 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Назначить {{ v.expertise_type }} экспертизу, производство которой поручить {% if raw.performer_kind == 'экспертному учреждению' %}{{ v.institution }}{% else %}{{ m.participant_details('expert') }}{% endif %}.</p>
+      <p>2. Поставить перед экспертом следующие вопросы:</p>
+      <p class="pre">{{ v.questions }}</p>
+      <p>3. Предоставить в распоряжение эксперта:</p>
+      <p class="pre">{{ v.materials }}</p>
+      {% if has.permissions %}<p>4. {{ v.permissions }}</p>{% endif %}
+      <p>{% if has.permissions %}5{% else %}4{% endif %}. {% if raw.performer_kind == 'экспертному учреждению' %}Поручить руководителю экспертного учреждения разъяснить эксперту права и обязанности, предусмотренные ст. 57 УПК РФ, и предупредить его об уголовной ответственности за дачу заведомо ложного заключения по ст. 307 УК РФ.{% else %}Разъяснить эксперту права и обязанности, предусмотренные ст. 57 УПК РФ, и предупредить его об уголовной ответственности за дачу заведомо ложного заключения по ст. 307 УК РФ.{% endif %}</p>
+      {{ m.investigator_sign() }}
+      {% if raw.performer_kind != 'экспертному учреждению' %}<p>Права и обязанности, предусмотренные ст. 57 УПК РФ, мне разъяснены. Об уголовной ответственности за дачу заведомо ложного заключения по ст. 307 УК РФ предупреждён(-а).</p>{{ m.sign("Эксперт", pv('expert', 'short_name')) }}{% endif %}
+
+  - code: expertise_additional
+    title: "Постановление о назначении дополнительной судебной экспертизы"
+    section: expertise
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [дополнительная экспертиза, неполнота заключения, новые вопросы]
+    legal_bases:
+      - {key: "upk:207", reason: "Дополнительная судебная экспертиза (ч. 1 ст. 207 УПК РФ)"}
+      - {key: "upk:195", reason: "Порядок назначения судебной экспертизы"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: expertise_type, label: "Вид (род) экспертизы", type: text, required: true}
+      - {key: prior_opinion, label: "Первоначальное заключение (эксперт, номер, дата)", type: text, required: true}
+      - {key: ground, label: "Основание", type: select, required: true, options: ["недостаточная ясность заключения эксперта", "недостаточная полнота заключения эксперта", "возникновение новых вопросов в отношении ранее исследованных обстоятельств"]}
+      - {key: grounds_details, label: "Обоснование", type: textarea, required: true}
+      - {key: performer, label: "Кому поручается (тот же или другой эксперт, учреждение)", type: text, required: true}
+      - {key: questions, label: "Вопросы эксперту", type: list, required: true}
+      - {key: materials, label: "Предоставляемые материалы", type: list, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о назначении дополнительной судебной экспертизы") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>По уголовному делу получено {{ v.prior_opinion }}. Основание назначения дополнительной экспертизы: {{ v.ground }}. {{ v.grounds_details }}</p>
+      <p>Руководствуясь ст. 195 и ч. 1 ст. 207 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Назначить дополнительную {{ v.expertise_type }} экспертизу, производство которой поручить {{ v.performer }}.</p>
+      <p>2. Поставить перед экспертом вопросы:</p>
+      <p class="pre">{{ v.questions }}</p>
+      <p>3. Предоставить в распоряжение эксперта:</p>
+      <p class="pre">{{ v.materials }}</p>
+      <p>4. Разъяснить эксперту права и обязанности, предусмотренные ст. 57 УПК РФ, предупредить об уголовной ответственности по ст. 307 УК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: expertise_repeat
+    title: "Постановление о назначении повторной судебной экспертизы"
+    section: expertise
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [повторная экспертиза, сомнения в обоснованности, противоречия в выводах]
+    legal_bases:
+      - {key: "upk:207", reason: "Повторная судебная экспертиза поручается другому эксперту (ч. 2 ст. 207 УПК РФ)"}
+      - {key: "upk:195", reason: "Порядок назначения судебной экспертизы"}
+    warnings:
+      - "Производство повторной экспертизы поручается другому эксперту (ч. 2 ст. 207 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: expertise_type, label: "Вид (род) экспертизы", type: text, required: true}
+      - {key: prior_opinion, label: "Первоначальное заключение (эксперт, номер, дата)", type: text, required: true}
+      - {key: ground, label: "Основание", type: select, required: true, options: ["сомнения в обоснованности заключения эксперта", "противоречия в выводах эксперта (экспертов) по тем же вопросам"]}
+      - {key: grounds_details, label: "Обоснование сомнений (противоречий)", type: textarea, required: true}
+      - {key: performer, label: "Другой эксперт (учреждение)", type: text, required: true}
+      - {key: questions, label: "Вопросы эксперту", type: list, required: true}
+      - {key: materials, label: "Предоставляемые материалы", type: list, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о назначении повторной судебной экспертизы") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>По уголовному делу получено {{ v.prior_opinion }}. Основание назначения повторной экспертизы: {{ v.ground }}. {{ v.grounds_details }}</p>
+      <p>Руководствуясь ст. 195 и ч. 2 ст. 207 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Назначить повторную {{ v.expertise_type }} экспертизу, производство которой поручить {{ v.performer }}.</p>
+      <p>2. Поставить перед экспертом вопросы:</p>
+      <p class="pre">{{ v.questions }}</p>
+      <p>3. Предоставить в распоряжение эксперта:</p>
+      <p class="pre">{{ v.materials }}</p>
+      <p>4. Разъяснить эксперту права и обязанности, предусмотренные ст. 57 УПК РФ, предупредить об уголовной ответственности по ст. 307 УК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: expertise_order_acquaintance
+    title: "Протокол ознакомления с постановлением о назначении судебной экспертизы"
+    section: expertise
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [ознакомление с постановлением о назначении экспертизы, ст. 198]
+    legal_bases:
+      - {key: "upk:195", reason: "Ознакомление участников с постановлением о назначении экспертизы (ч. 3 ст. 195 УПК РФ)"}
+      - {key: "upk:198", reason: "Права участников при назначении и производстве судебной экспертизы"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: time_start, label: "Время начала", type: time, required: true}
+      - {key: time_end, label: "Время окончания", type: time, required: true}
+      - {key: place_of_action, label: "Место", type: text, required: true}
+      - {key: resolution, label: "Постановление о назначении экспертизы (вид, дата)", type: text, required: true}
+      - {key: person, label: "Знакомящееся лицо", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: defender, label: "Защитник (представитель)", type: participant, participant_role: "defender|representative|legal_representative"}
+      - {key: statements, label: "Заявления и ходатайства (отводы, дополнительные вопросы, выбор учреждения)", type: textarea}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "ознакомления с постановлением о назначении судебной экспертизы") }}
+      {{ m.place_date() }}
+      <p class="small">Начато в {{ v.time_start }}, окончено в {{ v.time_end }}. Место: {{ v.place_of_action }}.</p>
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии с ч. 3 ст. 195 УПК РФ ознакомил {{ pv('person', 'role_label') }} {{ m.participant_details('person') }}{% if has.defender %} и {{ pv('defender', 'role_label') }} {{ pv('defender', 'display_name') }}{% endif %} с постановлением {{ v.resolution }} по уголовному делу № {{ v.case_number }} и разъяснил права, предусмотренные ст. 198 УПК РФ.</p>
+      <p>Заявления и ходатайства: {% if has.statements %}{{ v.statements }}{% else %}не поступили.{% endif %}</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      {% if has.defender %}{{ m.sign(pv('defender', 'role_label'), pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: expert_opinion_acquaintance
+    title: "Протокол ознакомления с заключением эксперта"
+    section: expertise
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation, completed]
+    keywords: [ознакомление с заключением эксперта, ст. 206]
+    legal_bases:
+      - {key: "upk:206", reason: "Предъявление заключения эксперта"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: time_start, label: "Время начала", type: time, required: true}
+      - {key: time_end, label: "Время окончания", type: time, required: true}
+      - {key: place_of_action, label: "Место", type: text, required: true}
+      - {key: opinion, label: "Заключение эксперта (номер, дата, вид экспертизы)", type: text, required: true}
+      - {key: person, label: "Знакомящееся лицо", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: defender, label: "Защитник (представитель)", type: participant, participant_role: "defender|representative|legal_representative"}
+      - {key: statements, label: "Объяснения, возражения, ходатайства о дополнительной (повторной) экспертизе", type: textarea}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "ознакомления с заключением эксперта") }}
+      {{ m.place_date() }}
+      <p class="small">Начато в {{ v.time_start }}, окончено в {{ v.time_end }}. Место: {{ v.place_of_action }}.</p>
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии со ст. 206 УПК РФ предъявил {{ pv('person', 'role_label') }} {{ m.participant_details('person') }}{% if has.defender %} и {{ pv('defender', 'role_label') }} {{ pv('defender', 'display_name') }}{% endif %} {{ v.opinion }} по уголовному делу № {{ v.case_number }}, разъяснив право дать объяснения, заявить возражения против заключения, ходатайствовать о постановке дополнительных вопросов эксперту, о назначении дополнительной либо повторной судебной экспертизы.</p>
+      <p>Объяснения, возражения, ходатайства: {% if has.statements %}{{ v.statements }}{% else %}не поступили.{% endif %}</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      {% if has.defender %}{{ m.sign(pv('defender', 'role_label'), pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: expertise_cover_letter
+    title: "Сопроводительное письмо в экспертное учреждение"
+    section: expertise
+    kind: letter
+    author: "Следователь"
+    addressee: "Руководитель экспертного учреждения"
+    stages: [check, investigation]
+    keywords: [экспертное учреждение, направление на экспертизу, сопроводительное]
+    legal_bases:
+      - {key: "upk:199", reason: "Направление руководителю экспертного учреждения постановления и материалов"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_number_only
+      - {key: resolution, label: "Постановление о назначении экспертизы (вид, дата)", type: text, required: true}
+      - {key: objects, label: "Направляемые объекты и материалы (упаковка, печати, количество листов)", type: list, required: true}
+    body: |
+      {{ m.letter_head() }}
+      <p>В соответствии со ст. 199 УПК РФ направляю для исполнения постановление {{ v.resolution }} по уголовному делу № {{ v.case_number }} и материалы, необходимые для производства экспертизы.</p>
+      <p>Прошу поручить производство экспертизы конкретному эксперту, разъяснить ему права и обязанности, предусмотренные ст. 57 УПК РФ, и предупредить об уголовной ответственности за дачу заведомо ложного заключения по ст. 307 УК РФ.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.objects }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: specialist_involvement
+    title: "Постановление о привлечении специалиста"
+    section: expertise
+    kind: resolution
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [специалист, привлечение специалиста]
+    legal_bases:
+      - {key: "upk:58", reason: "Специалист"}
+      - {key: "upk:168", reason: "Участие специалиста в следственных действиях"}
+      - {key: "uk:307", reason: "Ответственность специалиста за дачу заведомо ложного заключения или показаний", mandatory: false}
+    warnings:
+      - "УПК РФ не предусматривает обязательного вынесения отдельного постановления о привлечении специалиста; документ используется при наличии ведомственной практики. Участие специалиста отражается в протоколе следственного действия."
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: specialist, label: "Специалист", type: participant, participant_role: "specialist", required: true}
+      - {key: action, label: "Следственное действие (процессуальное действие), к участию в котором привлекается специалист", type: text, required: true}
+      - {key: tasks, label: "Задачи специалиста", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о привлечении специалиста") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>Для участия в следующем действии требуются специальные знания: {{ v.action }}. Задачи специалиста: {{ v.tasks }}</p>
+      <p>Руководствуясь ст. 58 и 168 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Привлечь {{ m.participant_details('specialist') }} к участию в указанном действии в качестве специалиста, разъяснив права и ответственность, предусмотренные ст. 58 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>Права и обязанности, предусмотренные ст. 58 УПК РФ, разъяснены.</p>
+      {{ m.sign("Специалист", pv('specialist', 'short_name')) }}
+
+  - code: objects_transfer_inventory
+    title: "Опись объектов, направляемых на экспертизу (исследование)"
+    section: expertise
+    kind: inventory
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [опись объектов, упаковка, маркировка, передача объектов]
+    legal_bases:
+      - {key: "upk:199", reason: "Направление материалов для производства экспертизы"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: recipient, label: "Получатель (экспертное учреждение)", type: text, required: true}
+      - {key: objects, label: "Объекты: наименование, упаковка, маркировка, целостность печатей", type: list, required: true}
+      - {key: transferred_by, label: "Передал (должность, фамилия, инициалы)", type: text, required: true, binding: case.investigator_name}
+    body: |
+      {{ m.title("ОПИСЬ", "объектов, направляемых на экспертизу (исследование)") }}
+      {{ m.place_date() }}
+      <p>Уголовное дело № {{ v.case_number }}. Получатель: {{ v.recipient }}.</p>
+      <p class="pre">{{ v.objects }}</p>
+      {{ m.sign("Передал", v.transferred_by) }}
+      {{ m.sign("Принял", "") }}

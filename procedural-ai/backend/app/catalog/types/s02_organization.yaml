@@ -1,0 +1,334 @@
+# Раздел 4.2. Организация производства по уголовному делу
+documents:
+  - code: acceptance
+    title: "Постановление о принятии уголовного дела к производству"
+    section: organization
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [принять к производству, принятие дела, поручено]
+    legal_bases:
+      - {key: "upk:38", reason: "Полномочия следователя"}
+      - {key: "upk:156", reason: "Начало производства предварительного расследования; принятие дела к производству"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: receipt_basis, label: "Основание поступления уголовного дела", type: textarea, required: true, group: "Содержание", help: "Например: поручение руководителя следственного органа от ..., изъятие и передача дела другому следователю"}
+      - {key: prosecutor, label: "Прокурор, которому направляется копия (при необходимости)", type: text, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о принятии уголовного дела к производству") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>В производстве находится уголовное дело № {{ v.case_number }}, возбуждённое по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.receipt_basis }}</p>
+      <p>Руководствуясь ст. 38 и 156 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Уголовное дело № {{ v.case_number }} принять к своему производству.</p>
+      {% if has.prosecutor %}<p>2. Копию настоящего постановления направить {{ v.prosecutor }}.</p>{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: joinder
+    title: "Постановление о соединении уголовных дел"
+    section: organization
+    kind: head_resolution
+    author: "Руководитель следственного органа"
+    stages: [investigation, suspended]
+    keywords: [соединение, соединить уголовные дела, одно производство]
+    legal_bases:
+      - {key: "upk:153", reason: "Основания и порядок соединения уголовных дел"}
+      - {key: "upk:39", reason: "Полномочия руководителя следственного органа"}
+    warnings:
+      - "Постановление выносится руководителем следственного органа. Проверьте порядок, установленный ч. 4 ст. 153 УПК РФ, и исчисление срока следствия по соединённым делам."
+    fields:
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+      - {key: city, label: "Место составления", type: text, required: true, binding: case.city}
+      - use: head_ref
+      - {key: cases_list, label: "Соединяемые уголовные дела (номер, дата возбуждения, квалификация)", type: list, required: true, group: "Содержание"}
+      - {key: circumstances, label: "Обстоятельства, обосновывающие соединение", type: textarea, required: true, group: "Содержание"}
+      - {key: ground, label: "Основание соединения", type: select, required: true, group: "Решение", options: ["п. 1 ч. 1 ст. 153 УПК РФ — в отношении нескольких лиц, совершивших одно или несколько преступлений в соучастии", "п. 2 ч. 1 ст. 153 УПК РФ — в отношении одного лица, совершившего несколько преступлений", "п. 3 ч. 1 ст. 153 УПК РФ — в отношении лица, обвиняемого в заранее не обещанном укрывательстве преступлений, расследуемых по этим уголовным делам", "ч. 2 ст. 153 УПК РФ — лицо не установлено, имеются достаточные основания полагать, что преступления совершены одним лицом (группой лиц)"]}
+      - {key: joined_number, label: "Номер, присваиваемый соединённому делу", type: text, required: true, group: "Решение"}
+      - {key: investigator_assigned, label: "Следователь, которому поручается расследование", type: text, required: true, binding: case.investigator_name, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о соединении уголовных дел") }}
+      {{ m.place_date() }}
+      <p>{{ vc.head_position }} {{ v.head_name }}, рассмотрев материалы уголовных дел:</p>
+      <p class="pre">{{ v.cases_list }}</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>Таким образом, имеются основания для соединения указанных уголовных дел в одном производстве, предусмотренные {{ v.ground }}.</p>
+      <p>Руководствуясь ст. 39 и 153 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Соединить указанные уголовные дела в одно производство, присвоив соединённому уголовному делу № {{ v.joined_number }}.</p>
+      <p>2. Производство предварительного следствия по соединённому уголовному делу поручить {{ v.investigator_assigned }}.</p>
+      {{ m.sign(v.head_position, v.head_name) }}
+
+  - code: separation
+    title: "Постановление о выделении уголовного дела"
+    section: organization
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [выделение уголовного дела, выделить, отдельное производство]
+    legal_bases:
+      - {key: "upk:154", reason: "Основания и порядок выделения уголовного дела"}
+    warnings:
+      - "Уголовное дело, выделенное для расследования нового преступления или в отношении нового лица, возбуждается в порядке, установленном УПК РФ (ст. 154 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: circumstances, label: "Обстоятельства, обосновывающие выделение", type: textarea, required: true, group: "Содержание"}
+      - {key: ground, label: "Основание выделения", type: select, required: true, group: "Решение", options: ["п. 1 ч. 1 ст. 154 УПК РФ — в отношении отдельных обвиняемых по делу о преступлениях, совершённых в соучастии", "п. 2 ч. 1 ст. 154 УПК РФ — в отношении несовершеннолетнего обвиняемого, привлекаемого к уголовной ответственности вместе со взрослыми обвиняемыми", "п. 3 ч. 1 ст. 154 УПК РФ — в отношении иных лиц, подозреваемых (обвиняемых) в совершении преступления, не связанного с деяниями, вменяемыми по расследуемому делу", "п. 4 ч. 1 ст. 154 УПК РФ — в отношении подозреваемого (обвиняемого), с которым заключено досудебное соглашение о сотрудничестве"]}
+      - {key: person, label: "Лицо, в отношении которого выделяется дело (при наличии)", type: participant, participant_role: "suspect|accused", group: "Решение"}
+      - {key: materials, label: "Перечень материалов (подлинники или копии), выделяемых в новое дело", type: list, required: true, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о выделении уголовного дела") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>Руководствуясь ст. 154 УПК РФ ({{ v.ground }}),</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Выделить из уголовного дела № {{ v.case_number }} в отдельное производство уголовное дело{% if has.person %} в отношении {{ pv('person', 'display_name') }}{% endif %}.</p>
+      <p>2. В выделенное уголовное дело включить следующие материалы:</p>
+      <p class="pre">{{ v.materials }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: separation_materials
+    title: "Постановление о выделении в отдельное производство материалов уголовного дела"
+    section: organization
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation, suspended]
+    keywords: [выделение материалов, новое преступление, ст. 155]
+    legal_bases:
+      - {key: "upk:155", reason: "Выделение материалов, содержащих сведения о новом преступлении"}
+      - {key: "upk:144", reason: "Рассмотрение выделенных материалов как сообщения о преступлении"}
+      - {key: "upk:145", reason: "Решения по результатам рассмотрения сообщения"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: new_crime, label: "Сведения о новом преступлении, не связанном с расследуемым", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: materials, label: "Выделяемые материалы (подлинники или копии)", type: list, required: true, group: "Решение"}
+      - {key: recipient, label: "Куда направляются материалы для решения в порядке ст. 144, 145 УПК РФ", type: text, required: true, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о выделении в отдельное производство материалов уголовного дела") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.new_crime }}</p>
+      <p>Руководствуясь ст. 155 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Выделить из уголовного дела № {{ v.case_number }} материалы, содержащие сведения о новом преступлении:</p>
+      <p class="pre">{{ v.materials }}</p>
+      <p>2. Выделенные материалы направить в {{ v.recipient }} для принятия решения в соответствии со ст. 144 и 145 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: jurisdiction_transfer_petition
+    title: "Рапорт (ходатайство) о направлении уголовного дела по подследственности"
+    section: organization
+    kind: petition
+    author: "Следователь"
+    addressee: "Руководитель следственного органа"
+    stages: [investigation]
+    keywords: [подследственность, направить уголовное дело, передача дела]
+    legal_bases:
+      - {key: "upk:151", reason: "Подследственность"}
+      - {key: "upk:152", reason: "Место производства предварительного расследования"}
+      - {key: "upk:39", reason: "Полномочия руководителя следственного органа"}
+    warnings:
+      - "Решение о передаче уголовного дела принимается уполномоченным должностным лицом; система формирует обращение следователя и не создаёт самостоятельного полномочия на передачу."
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: reasons, label: "Обстоятельства, свидетельствующие о подследственности иному органу", type: textarea, required: true, group: "Содержание"}
+      - {key: recipient, label: "Орган, которому подследственно уголовное дело", type: text, required: true, group: "Содержание"}
+    body: |
+      <div class="addressee"><p>{{ vc.head_position }}</p><p>{{ v.head_name }}</p></div>
+      {{ m.title("РАПОРТ") }}
+      <p>В моём производстве находится уголовное дело № {{ v.case_number }}, возбуждённое по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.reasons }}</p>
+      <p>С учётом положений ст. 151 и 152 УПК РФ прошу рассмотреть вопрос о направлении уголовного дела по подследственности в {{ v.recipient }}.</p>
+      {{ m.investigator_sign() }}
+      <p>{{ v.doc_date }}</p>
+
+  - code: investigative_group
+    title: "Постановление о производстве предварительного следствия следственной группой (об изменении её состава)"
+    section: organization
+    kind: head_resolution
+    author: "Руководитель следственного органа"
+    stages: [investigation]
+    keywords: [следственная группа, состав группы, руководитель группы]
+    legal_bases:
+      - {key: "upk:163", reason: "Производство предварительного следствия следственной группой"}
+      - {key: "upk:39", reason: "Полномочия руководителя следственного органа"}
+    warnings:
+      - "Постановление о создании следственной группы и изменении её состава подлежит объявлению участникам в порядке ст. 163 УПК РФ."
+    fields:
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+      - {key: city, label: "Место составления", type: text, required: true, binding: case.city}
+      - use: head_ref
+      - use: case_ref
+      - {key: action, label: "Решение", type: select, required: true, options: ["создание следственной группы", "изменение состава следственной группы"], group: "Решение"}
+      - {key: reasons, label: "Обоснование (сложность, объём уголовного дела)", type: textarea, required: true, group: "Содержание"}
+      - {key: group_leader, label: "Руководитель следственной группы (должность, фамилия, инициалы)", type: text, required: true, group: "Решение"}
+      - {key: members, label: "Члены следственной группы (должность, фамилия, инициалы)", type: list, required: true, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о производстве предварительного следствия следственной группой") }}
+      {{ m.place_date() }}
+      <p>{{ vc.head_position }} {{ v.head_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 39 и 163 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Принять решение: {{ v.action }} по уголовному делу № {{ v.case_number }}.</p>
+      <p>2. Руководителем следственной группы назначить {{ v.group_leader }}.</p>
+      <p>3. В состав следственной группы включить:</p>
+      <p class="pre">{{ v.members }}</p>
+      <p>4. Настоящее постановление объявить подозреваемому (обвиняемому), потерпевшему, гражданскому истцу, гражданскому ответчику и их представителям в порядке, предусмотренном ст. 163 УПК РФ.</p>
+      {{ m.sign(v.head_position, v.head_name) }}
+
+  - code: term_extension_petition
+    title: "Постановление о возбуждении ходатайства о продлении срока предварительного следствия"
+    section: organization
+    kind: resolution
+    author: "Следователь"
+    addressee: "Руководитель следственного органа, уполномоченный на продление срока"
+    stages: [investigation]
+    requires_head_consent: false
+    keywords: [продление срока следствия, ходатайство о продлении, срок предварительного следствия]
+    legal_bases:
+      - {key: "upk:162", reason: "Срок предварительного следствия и порядок его продления; представление ходатайства не позднее 5 суток до истечения срока (ч. 7 ст. 162 УПК РФ)"}
+    warnings:
+      - "Ходатайство представляется руководителю следственного органа не позднее 5 суток до дня истечения срока предварительного следствия (ч. 7 ст. 162 УПК РФ). Проверьте расчёт в модуле сроков."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: opened_at, label: "Дата возбуждения уголовного дела", type: date, required: true, binding: case.opened_at, group: "Сроки"}
+      - {key: term_history, label: "Сведения о ранее продлевавшихся сроках", type: textarea, group: "Сроки"}
+      - {key: current_expiry, label: "Дата истечения текущего срока следствия", type: date, required: true, group: "Сроки"}
+      - {key: requested_total, label: "Испрашиваемый срок (всего, месяцев) и дата окончания", type: text, required: true, group: "Сроки", help: "Например: до 4 месяцев, то есть до 09.07.2026"}
+      - {key: circumstances, label: "Краткое изложение обстоятельств дела", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: done_actions, label: "Выполненные следственные и процессуальные действия", type: textarea, required: true, group: "Содержание"}
+      - {key: remaining_actions, label: "Действия, которые необходимо выполнить", type: textarea, required: true, group: "Содержание"}
+      - {key: reasons, label: "Причины, по которым следствие не может быть окончено в установленный срок", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении ходатайства о продлении срока предварительного следствия") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>Уголовное дело № {{ v.case_number }} возбуждено {{ v.opened_at }} по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.circumstances }}</p>
+      {% if has.term_history %}<p>{{ v.term_history }}</p>{% endif %}
+      <p>Срок предварительного следствия истекает {{ v.current_expiry }}.</p>
+      <p>В ходе предварительного следствия выполнено: {{ v.done_actions }}</p>
+      <p>Вместе с тем необходимо: {{ v.remaining_actions }}</p>
+      <p>{{ v.reasons }}</p>
+      <p>Учитывая изложенное, руководствуясь ч. 7 ст. 162 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить ходатайство о продлении срока предварительного следствия по уголовному делу № {{ v.case_number }} {{ v.requested_total }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: suspension
+    title: "Постановление о приостановлении предварительного следствия"
+    section: organization
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [приостановление, приостановить следствие, лицо не установлено, скрылся]
+    legal_bases:
+      - {key: "upk:208", reason: "Основания, порядок и сроки приостановления предварительного следствия"}
+      - {key: "upk:209", reason: "Действия следователя после приостановления предварительного следствия"}
+    warnings:
+      - "Проверьте соблюдение условий ст. 208 УПК РФ о моменте приостановления и выполнение всех следственных действий, производство которых возможно в отсутствие подозреваемого (обвиняемого)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: circumstances, label: "Обстоятельства дела и выполненные действия", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: ground, label: "Основание приостановления", type: select, required: true, group: "Решение", options: ["п. 1 ч. 1 ст. 208 УПК РФ — лицо, подлежащее привлечению в качестве обвиняемого, не установлено", "п. 2 ч. 1 ст. 208 УПК РФ — подозреваемый (обвиняемый) скрылся от следствия либо место его нахождения не установлено по иным причинам", "п. 3 ч. 1 ст. 208 УПК РФ — место нахождения подозреваемого (обвиняемого) известно, однако реальная возможность его участия в уголовном деле отсутствует", "п. 4 ч. 1 ст. 208 УПК РФ — временное тяжёлое заболевание подозреваемого (обвиняемого), удостоверенное медицинским заключением"]}
+      - {key: ground_facts, label: "Фактические данные, подтверждающие основание", type: textarea, required: true, group: "Решение"}
+      - {key: instructions, label: "Поручения органу дознания (розыск, установление лица) — при необходимости", type: textarea, group: "Решение"}
+      - {key: prosecutor, label: "Прокурор, которому направляется копия", type: text, required: true, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о приостановлении предварительного следствия") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>{{ v.ground_facts }}</p>
+      <p>Таким образом, имеется основание для приостановления предварительного следствия, предусмотренное {{ v.ground }}.</p>
+      <p>Руководствуясь ст. 208 и 209 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Предварительное следствие по уголовному делу № {{ v.case_number }} приостановить.</p>
+      {% if has.instructions %}<p>2. {{ v.instructions }}</p>{% endif %}
+      <p>{% if has.instructions %}3{% else %}2{% endif %}. Копию настоящего постановления направить {{ v.prosecutor }}.</p>
+      <p>{% if has.instructions %}4{% else %}3{% endif %}. О приостановлении предварительного следствия уведомить потерпевшего, его представителя, гражданского истца, гражданского ответчика или их представителей, разъяснив порядок обжалования данного решения.</p>
+      {{ m.investigator_sign() }}
+
+  - code: resumption
+    title: "Постановление о возобновлении предварительного следствия"
+    section: organization
+    kind: head_resolution
+    author: "Руководитель следственного органа"
+    stages: [suspended, terminated]
+    keywords: [возобновление, возобновить следствие, дополнительное следствие]
+    legal_bases:
+      - {key: "upk:211", reason: "Возобновление приостановленного предварительного следствия"}
+      - {key: "upk:162", reason: "Установление срока дополнительного следствия (ч. 6 ст. 162 УПК РФ)"}
+      - {key: "upk:39", reason: "Полномочия руководителя следственного органа"}
+    warnings:
+      - "Перед использованием проверьте, какое должностное лицо уполномочено выносить постановление в данной процессуальной ситуации (ст. 211, 214 УПК РФ)."
+    fields:
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+      - {key: city, label: "Место составления", type: text, required: true, binding: case.city}
+      - use: head_ref
+      - use: case_ref
+      - {key: suspension_info, label: "Когда и по какому основанию следствие было приостановлено", type: text, required: true, group: "Содержание"}
+      - {key: reasons, label: "Основания возобновления (отпадение оснований приостановления, необходимость следственных действий)", type: textarea, required: true, group: "Содержание"}
+      - {key: additional_term, label: "Срок дополнительного следствия", type: text, required: true, group: "Решение", help: "Не более 1 месяца со дня поступления дела к следователю (ч. 6 ст. 162 УПК РФ)"}
+      - {key: investigator_assigned, label: "Следователь, которому поручается расследование", type: text, required: true, binding: case.investigator_name, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возобновлении предварительного следствия") }}
+      {{ m.place_date() }}
+      <p>{{ vc.head_position }} {{ v.head_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>Уголовное дело № {{ v.case_number }} возбуждено по признакам преступления, предусмотренного {{ v.qualification }}. Предварительное следствие приостановлено: {{ v.suspension_info }}.</p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 39, ч. 6 ст. 162 и ст. 211 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Предварительное следствие по уголовному делу № {{ v.case_number }} возобновить.</p>
+      <p>2. Установить срок дополнительного следствия {{ v.additional_term }}.</p>
+      <p>3. Производство предварительного следствия поручить {{ v.investigator_assigned }}.</p>
+      <p>4. О возобновлении предварительного следствия уведомить заинтересованных участников уголовного судопроизводства.</p>
+      {{ m.sign(v.head_position, v.head_name) }}
+
+  - code: head_cancel_resolution
+    title: "Постановление руководителя следственного органа об отмене постановления следователя"
+    section: organization
+    kind: head_resolution
+    author: "Руководитель следственного органа"
+    stages: [check, investigation, suspended, terminated]
+    keywords: [отмена постановления, незаконное, необоснованное, отменить]
+    legal_bases:
+      - {key: "upk:39", reason: "Полномочие руководителя следственного органа отменять незаконные или необоснованные постановления следователя"}
+    fields:
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+      - {key: city, label: "Место составления", type: text, required: true, binding: case.city}
+      - use: head_ref
+      - {key: cancelled_decision, label: "Отменяемое постановление (наименование, дата, автор)", type: text, required: true, group: "Содержание"}
+      - {key: subject, label: "Уголовное дело (материал проверки)", type: text, required: true, binding: case.case_number, group: "Содержание"}
+      - {key: reasons, label: "Мотивы незаконности (необоснованности) постановления", type: textarea, required: true, group: "Содержание"}
+      - {key: instructions, label: "Указания следователю", type: textarea, group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "об отмене постановления следователя") }}
+      {{ m.place_date() }}
+      <p>{{ vc.head_position }} {{ v.head_name }}, изучив материалы {{ v.subject }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.cancelled_decision }}.</p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 39 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Отменить {{ v.cancelled_decision }} как незаконное (необоснованное).</p>
+      {% if has.instructions %}<p>2. {{ v.instructions }}</p>{% endif %}
+      {{ m.sign(v.head_position, v.head_name) }}

@@ -1,0 +1,311 @@
+# Раздел 4.1. Проверка сообщения о преступлении
+documents:
+  - code: crime_statement_form
+    title: "Заявление о преступлении (бланк письменного заявления)"
+    section: check
+    kind: form
+    author: "Заявитель"
+    addressee: "Руководитель следственного органа"
+    stages: [check]
+    keywords: [заявление, преступление, заявитель, бланк]
+    legal_bases:
+      - {key: "upk:141", reason: "Форма и содержание заявления о преступлении (ч. 2, 6 ст. 141 УПК РФ)"}
+      - {key: "uk:306", reason: "Предупреждение заявителя об ответственности за заведомо ложный донос"}
+    warnings:
+      - "Документ составляется и подписывается заявителем; система формирует бланк, а не текст заявления от имени заявителя."
+    fields:
+      - {key: addressee_org, label: "Кому адресовано (руководитель следственного органа)", type: text, required: true, group: "Адресат"}
+      - {key: applicant, label: "Заявитель", type: participant, participant_role: "applicant|victim", required: true, group: "Заявитель"}
+      - {key: statement_text, label: "Текст заявления (изложение заявителем)", type: textarea, group: "Содержание", help: "Заполняется со слов заявителя либо оставляется пустым для собственноручного заполнения"}
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+    body: |
+      <div class="addressee"><p>{{ v.addressee_org }}</p><p>от {{ m.participant_details('applicant') }}</p></div>
+      {{ m.title("ЗАЯВЛЕНИЕ") }}
+      {% if has.statement_text %}<p>{{ v.statement_text }}</p>{% else %}<p class="pre">________________________________________________________________________________
+      ________________________________________________________________________________
+      ________________________________________________________________________________</p>{% endif %}
+      <p>Об уголовной ответственности за заведомо ложный донос по ст. 306 УК РФ предупреждён(-а).</p>
+      {{ m.sign("Заявитель", pv('applicant', 'short_name')) }}
+      <p>{{ v.doc_date }}</p>
+
+  - code: oral_statement_protocol
+    title: "Протокол принятия устного заявления о преступлении"
+    section: check
+    kind: protocol
+    author: "Следователь"
+    stages: [check]
+    keywords: [устное заявление, протокол, заявитель, принятие]
+    legal_bases:
+      - {key: "upk:141", reason: "Устное заявление о преступлении заносится в протокол (ч. 3 ст. 141 УПК РФ)"}
+      - {key: "upk:166", reason: "Общие требования к протоколу"}
+      - {key: "uk:306", reason: "Предупреждение об ответственности за заведомо ложный донос (ч. 6 ст. 141 УПК РФ)"}
+    fields:
+      - use: protocol_core
+      - {key: applicant, label: "Заявитель", type: participant, participant_role: "applicant|victim", required: true, group: "Заявитель"}
+      - {key: identity_doc, label: "Документ, удостоверяющий личность заявителя (вид, серия, номер, кем и когда выдан)", type: text, required: true, group: "Заявитель", help: "ч. 3 ст. 141 УПК РФ"}
+      - {key: statement_text, label: "Содержание заявления со слов заявителя", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "принятия устного заявления о преступлении") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} принял устное заявление о преступлении от {{ m.participant_details('applicant') }}.</p>
+      <p>Документ, удостоверяющий личность заявителя: {{ v.identity_doc }}.</p>
+      <p>Заявитель предупреждён об уголовной ответственности за заведомо ложный донос по ст. 306 УК РФ.</p>
+      {{ m.sign("Заявитель", pv('applicant', 'short_name')) }}
+      <p>По существу заявления заявитель сообщил следующее:</p>
+      <p>{{ v.statement_text }}</p>
+      <p>Протокол прочитан заявителем лично. Записано с его (её) слов верно.</p>
+      {{ m.sign("Заявитель", pv('applicant', 'short_name')) }}
+      <p>Заявление принял:</p>
+      {{ m.investigator_sign() }}
+
+  - code: crime_report
+    title: "Рапорт об обнаружении признаков преступления"
+    section: check
+    kind: report
+    author: "Следователь (должностное лицо, получившее сообщение)"
+    addressee: "Руководитель следственного органа"
+    stages: [check, investigation]
+    keywords: [рапорт, обнаружение, признаки преступления]
+    legal_bases:
+      - {key: "upk:143", reason: "Рапорт об обнаружении признаков преступления"}
+      - {key: "upk:140", reason: "Сообщение о преступлении, полученное из иных источников, как повод для возбуждения уголовного дела"}
+    fields:
+      - use: header
+      - use: head_ref
+      - {key: info_source, label: "Источник получения сведений", type: textarea, required: true, group: "Содержание", help: "Например: в ходе расследования уголовного дела № ..., из материалов, поступивших из ..."}
+      - {key: circumstances, label: "Обнаруженные обстоятельства, указывающие на признаки преступления", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: preliminary_qualification, label: "Предварительная правовая оценка (признаки преступления, предусмотренного ... УК РФ)", type: text, required: true, group: "Содержание"}
+    body: |
+      <div class="addressee"><p>{{ vc.head_position }}</p><p>{{ v.head_name }}</p></div>
+      {{ m.title("РАПОРТ", "об обнаружении признаков преступления") }}
+      <p>Докладываю, что {{ v.info_source }}</p>
+      <p>{{ v.circumstances }}</p>
+      <p>В указанных обстоятельствах усматриваются признаки преступления, предусмотренного {{ v.preliminary_qualification }}.</p>
+      <p>Учитывая изложенное, полагаю необходимым зарегистрировать настоящий рапорт в книге регистрации сообщений о преступлениях и провести проверку в порядке, предусмотренном ст. 144, 145 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>{{ v.doc_date }}</p>
+
+  - code: explanation
+    title: "Объяснение"
+    section: check
+    kind: protocol
+    author: "Следователь"
+    stages: [check]
+    keywords: [объяснение, опрос, проверка сообщения]
+    legal_bases:
+      - {key: "upk:144", reason: "Получение объяснений при проверке сообщения о преступлении; разъяснение прав (ч. 1, 1.1 ст. 144 УПК РФ)"}
+      - {key: "konst:51", reason: "Право не свидетельствовать против себя и близких родственников"}
+    fields:
+      - use: protocol_core
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП) и дата", type: text, group: "Проверка сообщения"}
+      - {key: person, label: "Опрашиваемое лицо", type: participant, participant_role: "applicant|victim|witness|suspect|other", required: true, group: "Опрашиваемое лицо"}
+      - {key: explanation_text, label: "Содержание пояснений", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.title("ОБЪЯСНЕНИЕ") }}
+      <table class="place-date"><tr><td>{{ v.city }}</td><td class="right">{{ vl.doc_date }}</td></tr></table>
+      <p class="small">Опрос начат в {{ v.time_start }}, окончен в {{ v.time_end }}. Место: {{ v.place_of_action }}.</p>
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}{% if has.kusp %} в рамках проверки сообщения о преступлении (КУСП {{ v.kusp }}){% endif %} получил объяснение от:</p>
+      {{ m.participant_card('person') }}
+      <p>Опрашиваемому лицу разъяснены права и обязанности, предусмотренные ч. 1.1 ст. 144 УПК РФ, в том числе право не свидетельствовать против самого себя, своего супруга (своей супруги) и других близких родственников, круг которых определён п. 4 ст. 5 УПК РФ, пользоваться услугами адвоката, приносить жалобы на действия (бездействие) и решения в порядке, установленном главой 16 УПК РФ, а также положения ст. 51 Конституции Российской Федерации.</p>
+      {{ m.sign("Опрашиваемое лицо", pv('person', 'short_name')) }}
+      <p>По существу заданных вопросов пояснил(-а) следующее:</p>
+      <p>{{ v.explanation_text }}</p>
+      <p>С моих слов записано верно, мною прочитано.</p>
+      {{ m.sign("Опрашиваемое лицо", pv('person', 'short_name')) }}
+      <p>Объяснение получил:</p>
+      {{ m.investigator_sign() }}
+
+  - code: check_term_extension_petition
+    title: "Ходатайство о продлении срока проверки сообщения о преступлении"
+    section: check
+    kind: petition
+    author: "Следователь"
+    addressee: "Руководитель следственного органа"
+    stages: [check]
+    keywords: [продление, срок проверки, 10 суток, 30 суток]
+    legal_bases:
+      - {key: "upk:144", reason: "Продление срока проверки сообщения о преступлении руководителем следственного органа (ч. 3 ст. 144 УПК РФ)"}
+    fields:
+      - use: header
+      - use: head_ref
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП)", type: text, required: true, group: "Проверка сообщения"}
+      - {key: kusp_date, label: "Дата регистрации сообщения", type: date, required: true, group: "Проверка сообщения"}
+      - {key: report_summary, label: "Краткое содержание сообщения", type: textarea, required: true, group: "Проверка сообщения"}
+      - {key: requested_term, label: "Испрашиваемый срок", type: select, required: true, options: ["до 10 суток", "до 30 суток"], group: "Продление"}
+      - {key: done_actions, label: "Проведённые проверочные мероприятия", type: textarea, required: true, group: "Продление"}
+      - {key: remaining_actions, label: "Мероприятия, которые необходимо выполнить", type: textarea, required: true, group: "Продление", help: "Для продления до 30 суток обязательно указание конкретных фактических обстоятельств: проведение документальных проверок, ревизий, судебных экспертиз, исследований, оперативно-розыскных мероприятий (ч. 3 ст. 144 УПК РФ)"}
+    body: |
+      <div class="addressee"><p>{{ vc.head_position }}</p><p>{{ v.head_name }}</p></div>
+      {{ m.title("ХОДАТАЙСТВО", "о продлении срока проверки сообщения о преступлении") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материал проверки сообщения о преступлении, зарегистрированного в книге регистрации сообщений о преступлениях за № {{ v.kusp }} от {{ v.kusp_date }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.report_summary }}</p>
+      <p>В ходе проверки выполнено следующее: {{ v.done_actions }}</p>
+      <p>Принять законное и обоснованное решение в установленный ч. 1 ст. 144 УПК РФ срок не представляется возможным, поскольку необходимо: {{ v.remaining_actions }}</p>
+      <p>На основании изложенного, руководствуясь ч. 3 ст. 144 УПК РФ,</p>
+      <p class="center"><b>ХОДАТАЙСТВУЮ:</b></p>
+      <p>о продлении срока проверки сообщения о преступлении № {{ v.kusp }} {{ v.requested_term }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: transfer_report_jurisdiction
+    title: "Постановление о передаче сообщения о преступлении по подследственности"
+    section: check
+    kind: resolution
+    author: "Следователь"
+    stages: [check]
+    keywords: [подследственность, передача сообщения, направить]
+    legal_bases:
+      - {key: "upk:145", reason: "Решение о передаче сообщения по подследственности (п. 3 ч. 1, ч. 2 ст. 145 УПК РФ)"}
+      - {key: "upk:151", reason: "Правила подследственности"}
+    fields:
+      - use: header
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП) и дата", type: text, required: true, group: "Проверка сообщения"}
+      - {key: report_summary, label: "Существо сообщения о преступлении", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: jurisdiction_reason, label: "Обоснование подследственности (часть и пункт ст. 151 УПК РФ, иные обстоятельства)", type: textarea, required: true, group: "Содержание"}
+      - {key: recipient, label: "Орган, в который передаётся сообщение", type: text, required: true, group: "Решение"}
+      - {key: applicant, label: "Заявитель (при наличии)", type: participant, participant_role: "applicant|victim", group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о передаче сообщения о преступлении по подследственности") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев сообщение о преступлении, зарегистрированное в книге регистрации сообщений о преступлениях за № {{ v.kusp }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.report_summary }}</p>
+      <p>{{ v.jurisdiction_reason }}</p>
+      <p>На основании изложенного, руководствуясь п. 3 ч. 1 ст. 145 и ст. 151 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Сообщение о преступлении № {{ v.kusp }} передать по подследственности в {{ v.recipient }}.</p>
+      <p>2. {% if has.applicant %}О принятом решении уведомить заявителя {{ pv('applicant', 'display_name') }}{% else %}О принятом решении уведомить заявителя{% endif %}, разъяснив ему право обжаловать данное решение и порядок обжалования (ч. 2 ст. 145 УПК РФ).</p>
+      {{ m.investigator_sign() }}
+
+  - code: initiation
+    title: "Постановление о возбуждении уголовного дела и принятии его к производству"
+    section: check
+    kind: resolution
+    author: "Следователь"
+    stages: [check]
+    keywords: [возбуждение, возбудить уголовное дело, принять к производству, повод, основание]
+    legal_bases:
+      - {key: "upk:140", reason: "Поводы и основание для возбуждения уголовного дела"}
+      - {key: "upk:145", reason: "Решение о возбуждении уголовного дела по результатам рассмотрения сообщения (п. 1 ч. 1 ст. 145 УПК РФ)"}
+      - {key: "upk:146", reason: "Порядок возбуждения уголовного дела публичного обвинения; направление копии прокурору (ч. 4 ст. 146 УПК РФ)"}
+      - {key: "upk:156", reason: "Принятие уголовного дела к производству"}
+    warnings:
+      - "Копия постановления незамедлительно направляется прокурору (ч. 4 ст. 146 УПК РФ)."
+    fields:
+      - use: header
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП)", type: text, required: true, group: "Сообщение о преступлении"}
+      - {key: kusp_date, label: "Дата регистрации сообщения", type: date, required: true, group: "Сообщение о преступлении"}
+      - {key: reason, label: "Повод для возбуждения уголовного дела", type: select, required: true, group: "Повод и основание", options: ["заявление о преступлении", "явка с повинной", "сообщение о совершённом или готовящемся преступлении, полученное из иных источников", "постановление прокурора о направлении соответствующих материалов в орган предварительного расследования для решения вопроса об уголовном преследовании"]}
+      - {key: reason_details, label: "Реквизиты документа, послужившего поводом", type: text, required: true, group: "Повод и основание", help: "Например: заявление Петрова И.С. от 10.03.2026"}
+      - {key: circumstances, label: "Установленные обстоятельства (описание события)", type: textarea, required: true, narrative: true, group: "Повод и основание", help: "Указываются только обстоятельства, подтверждённые материалами проверки"}
+      - {key: qualification, label: "Признаки преступления (пункт, часть, статья УК РФ)", type: text, required: true, binding: case.qualification, group: "Повод и основание"}
+      - {key: target, label: "В отношении кого", type: select, required: true, options: ["по факту (в отношении неустановленного лица)", "в отношении конкретного лица"], group: "Решение"}
+      - {key: suspect, label: "Лицо, в отношении которого возбуждается дело", type: participant, participant_role: "suspect|accused|other", required: true, condition: "target == 'в отношении конкретного лица'", group: "Решение"}
+      - {key: assigned_number, label: "Номер уголовного дела", type: text, binding: case.case_number, required: true, group: "Решение"}
+      - {key: prosecutor, label: "Прокурор, которому направляется копия постановления", type: text, required: true, group: "Решение"}
+      - {key: applicant, label: "Заявитель (при наличии)", type: participant, participant_role: "applicant|victim", group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении уголовного дела и принятии его к производству") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев сообщение о преступлении, зарегистрированное в книге регистрации сообщений о преступлениях за № {{ v.kusp }} от {{ v.kusp_date }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>Поводом для возбуждения уголовного дела является {{ v.reason }} ({{ v.reason_details }}), основанием — наличие достаточных данных, указывающих на признаки преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>Учитывая изложенное, руководствуясь ст. 140, п. 1 ч. 1 ст. 145, ст. 146 и ч. 1 ст. 156 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Возбудить уголовное дело {% if raw.target == 'в отношении конкретного лица' %}в отношении {{ pv('suspect', 'display_name') }}{% if pval('suspect', 'birth_date') %}, {{ pv('suspect', 'birth_date') }} года рождения,{% endif %}{% else %}по факту{% endif %} по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>2. Уголовное дело № {{ v.assigned_number }} принять к производству.</p>
+      <p>3. Копию настоящего постановления незамедлительно направить {{ v.prosecutor }}.</p>
+      <p>4. О принятом решении уведомить заявителя{% if has.applicant %} {{ pv('applicant', 'display_name') }}{% endif %}, разъяснив право обжаловать данное решение и порядок обжалования.</p>
+      {{ m.investigator_sign() }}
+
+  - code: refusal_initiation
+    title: "Постановление об отказе в возбуждении уголовного дела"
+    section: check
+    kind: resolution
+    author: "Следователь"
+    stages: [check]
+    keywords: [отказ, отказать в возбуждении, отсутствие состава, отсутствие события]
+    legal_bases:
+      - {key: "upk:24", reason: "Основания отказа в возбуждении уголовного дела"}
+      - {key: "upk:144", reason: "Порядок рассмотрения сообщения о преступлении"}
+      - {key: "upk:145", reason: "Решение об отказе в возбуждении уголовного дела (п. 2 ч. 1 ст. 145 УПК РФ)"}
+      - {key: "upk:148", reason: "Порядок отказа; направление копии заявителю и прокурору в течение 24 часов (ч. 4 ст. 148 УПК РФ)"}
+    warnings:
+      - "Отказ в возбуждении уголовного дела по основанию, предусмотренному п. 2 ч. 1 ст. 24 УПК РФ, допускается лишь в отношении конкретного лица (ч. 1 ст. 148 УПК РФ) — проверьте формулировку."
+    fields:
+      - use: header
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП)", type: text, required: true, group: "Сообщение о преступлении"}
+      - {key: kusp_date, label: "Дата регистрации сообщения", type: date, required: true, group: "Сообщение о преступлении"}
+      - {key: report_summary, label: "Существо сообщения", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: check_results, label: "Результаты проверки (установленные обстоятельства и их источники)", type: textarea, required: true, narrative: true, group: "Содержание"}
+      - {key: legal_assessment, label: "Правовая оценка (мотивы принятого решения)", type: textarea, required: true, group: "Содержание"}
+      - {key: ground, label: "Основание отказа", type: select, required: true, group: "Решение", options: ["п. 1 ч. 1 ст. 24 УПК РФ — в связи с отсутствием события преступления", "п. 2 ч. 1 ст. 24 УПК РФ — в связи с отсутствием в деянии состава преступления", "п. 3 ч. 1 ст. 24 УПК РФ — в связи с истечением сроков давности уголовного преследования", "п. 4 ч. 1 ст. 24 УПК РФ — в связи со смертью подозреваемого (обвиняемого)", "п. 5 ч. 1 ст. 24 УПК РФ — в связи с отсутствием заявления потерпевшего"]}
+      - {key: person, label: "Лицо, в отношении которого отказано в возбуждении дела", type: participant, participant_role: "suspect|other", condition: "ground == 'п. 2 ч. 1 ст. 24 УПК РФ — в связи с отсутствием в деянии состава преступления'", required: true, group: "Решение"}
+      - {key: crime_article, label: "Статья УК РФ, по признакам которой проводилась проверка", type: text, required: true, binding: case.qualification, group: "Решение"}
+      - {key: prosecutor, label: "Прокурор", type: text, required: true, group: "Решение"}
+      - {key: applicant, label: "Заявитель", type: participant, participant_role: "applicant|victim", group: "Решение"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "об отказе в возбуждении уголовного дела") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материал проверки сообщения о преступлении, зарегистрированного в книге регистрации сообщений о преступлениях за № {{ v.kusp }} от {{ v.kusp_date }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.report_summary }}</p>
+      <p>В ходе проверки установлено следующее: {{ v.check_results }}</p>
+      <p>{{ v.legal_assessment }}</p>
+      <p>На основании изложенного, руководствуясь {% if has.ground %}{{ raw.ground.split(' УПК')[0] }}, {% endif %}ст. 144, п. 2 ч. 1 ст. 145 и ст. 148 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Отказать в возбуждении уголовного дела по сообщению о преступлении, предусмотренном {{ v.crime_article }}{% if has.person %}, в отношении {{ pv('person', 'display_name') }}{% endif %}, на основании {{ v.ground }}.</p>
+      <p>2. Копию настоящего постановления в течение 24 часов с момента его вынесения направить заявителю{% if has.applicant %} {{ pv('applicant', 'display_name') }}{% endif %} и {{ v.prosecutor }}.</p>
+      <p>3. Разъяснить заявителю, что настоящее постановление может быть обжаловано руководителю следственного органа, прокурору или в суд в порядке, установленном ст. 124 и 125 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: applicant_decision_notice
+    title: "Уведомление заявителя о решении, принятом по сообщению о преступлении"
+    section: check
+    kind: notice
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [уведомление заявителя, сообщить заявителю, принятое решение]
+    legal_bases:
+      - {key: "upk:145", reason: "Сообщение заявителю о принятом решении и разъяснение права обжалования (ч. 2 ст. 145 УПК РФ)"}
+    fields:
+      - use: header
+      - use: outgoing
+      - {key: applicant, label: "Заявитель", type: participant, participant_role: "applicant|victim", required: true, group: "Адресат"}
+      - {key: applicant_address, label: "Почтовый адрес заявителя", type: text, required: true, group: "Адресат"}
+      - {key: kusp, label: "Регистрационный номер сообщения (КУСП) и дата", type: text, required: true, group: "Содержание"}
+      - {key: decision, label: "Принятое решение", type: select, required: true, group: "Содержание", options: ["о возбуждении уголовного дела", "об отказе в возбуждении уголовного дела", "о передаче сообщения по подследственности"]}
+      - {key: decision_date, label: "Дата решения", type: date, required: true, group: "Содержание"}
+      - {key: decision_details, label: "Дополнительные сведения о решении (номер дела, орган, в который передано сообщение)", type: text, group: "Содержание"}
+    body: |
+      <table class="letter-head"><tr><td class="left small">{% if has.out_number %}Исх. № {{ v.out_number }}{% else %}Исх. № ________{% endif %}<br>от {{ v.doc_date }}</td><td class="right"><div class="addressee"><p>{{ pv('applicant', 'display_name') }}</p><p>{{ v.applicant_address }}</p></div></td></tr></table>
+      {{ m.title("УВЕДОМЛЕНИЕ") }}
+      <p>Сообщаю, что по результатам рассмотрения Вашего сообщения о преступлении, зарегистрированного за № {{ v.kusp }}, {{ v.decision_date }} принято решение {{ v.decision }}{% if has.decision_details %} ({{ v.decision_details }}){% endif %}.</p>
+      <p>Данное решение может быть обжаловано руководителю следственного органа, прокурору или в суд в порядке, установленном ст. 124 и 125 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: cover_prosecutor_decision
+    title: "Сопроводительное письмо прокурору о направлении копии постановления"
+    section: check
+    kind: letter
+    author: "Следователь"
+    addressee: "Прокурор"
+    stages: [check, investigation]
+    keywords: [прокурор, копия постановления, направить прокурору, сопроводительное]
+    legal_bases:
+      - {key: "upk:146", reason: "Направление копии постановления о возбуждении уголовного дела прокурору (ч. 4 ст. 146 УПК РФ)", mandatory: false}
+      - {key: "upk:148", reason: "Направление копии постановления об отказе в возбуждении уголовного дела прокурору (ч. 4 ст. 148 УПК РФ)", mandatory: false}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - {key: decision, label: "Направляемое постановление", type: select, required: true, group: "Содержание", options: ["о возбуждении уголовного дела", "об отказе в возбуждении уголовного дела"]}
+      - {key: decision_date, label: "Дата постановления", type: date, required: true, group: "Содержание"}
+      - {key: subject, label: "Номер дела либо номер сообщения (КУСП)", type: text, required: true, group: "Содержание"}
+      - {key: pages, label: "Количество листов приложения", type: number, required: true, group: "Содержание"}
+    body: |
+      {{ m.letter_head() }}
+      <p>{% if raw.decision == 'о возбуждении уголовного дела' %}В соответствии с ч. 4 ст. 146 УПК РФ{% else %}В соответствии с ч. 4 ст. 148 УПК РФ{% endif %} направляю копию постановления {{ v.decision }} от {{ v.decision_date }} ({{ v.subject }}).</p>
+      <p>Приложение: копия постановления на {{ v.pages }} л.</p>
+      {{ m.investigator_sign() }}

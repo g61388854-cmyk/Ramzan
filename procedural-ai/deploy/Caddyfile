@@ -1,0 +1,14 @@
+# Обратный прокси с TLS. В локальной сети используется собственный (внутренний) удостоверяющий центр Caddy;
+# сертификат корневого ЦС распространяется на рабочие места. Возможна замена на сертификат организации.
+{$PAI_HOSTNAME} {
+	tls internal
+	encode gzip
+	request_body {
+		max_size 60MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	reverse_proxy app:8000
+}

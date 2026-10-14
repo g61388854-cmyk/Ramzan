@@ -1,0 +1,302 @@
+# Раздел 4.10. Окончание предварительного расследования
+documents:
+  - code: completion_notice_protocol
+    title: "Протокол уведомления обвиняемого об окончании следственных действий"
+    section: completion
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation, completed]
+    keywords: [окончание следственных действий, уведомление обвиняемого, ст. 215]
+    legal_bases:
+      - {key: "upk:215", reason: "Окончание предварительного следствия с обвинительным заключением; уведомление обвиняемого"}
+      - {key: "upk:217", reason: "Права обвиняемого при ознакомлении с материалами"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: time_start, label: "Время начала", type: time, required: true}
+      - {key: time_end, label: "Время окончания", type: time, required: true}
+      - {key: accused, label: "Обвиняемый", type: participant, participant_role: "accused", required: true}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender"}
+      - {key: statements, label: "Заявления обвиняемого (о желании ознакомиться совместно или раздельно с защитником и т. п.)", type: textarea}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "уведомления об окончании следственных действий") }}
+      {{ m.place_date() }}
+      <p class="small">Начато в {{ v.time_start }}, окончено в {{ v.time_end }}.</p>
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии со ст. 215 УПК РФ уведомил обвиняемого {{ m.participant_details('accused') }}{% if has.defender %}, с участием защитника {{ pv('defender', 'display_name') }},{% endif %} о том, что следственные действия по уголовному делу № {{ v.case_number }} окончены, а собранные доказательства достаточны для составления обвинительного заключения.</p>
+      <p>Обвиняемому разъяснено право на ознакомление со всеми материалами уголовного дела как лично, так и с помощью защитника, законного представителя, а также права, предусмотренные ст. 217 УПК РФ.</p>
+      <p>Заявления обвиняемого: {% if has.statements %}{{ v.statements }}{% else %}не поступили.{% endif %}</p>
+      {{ m.sign("Обвиняемый", pv('accused', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: completion_notice_participants
+    title: "Уведомление потерпевшего (гражданского истца, ответчика) об окончании следственных действий"
+    section: completion
+    kind: notice
+    author: "Следователь"
+    stages: [investigation, completed]
+    keywords: [уведомление потерпевшего, окончание следственных действий]
+    legal_bases:
+      - {key: "upk:215", reason: "Уведомление потерпевшего, гражданского истца, гражданского ответчика и их представителей (ч. 2 ст. 215 УПК РФ)"}
+      - {key: "upk:216", reason: "Ознакомление потерпевшего, гражданского истца, гражданского ответчика с материалами"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: case_number_only
+      - {key: recipient, label: "Адресат", type: participant, participant_role: "victim|civil_plaintiff|civil_defendant|representative|legal_representative", required: true}
+      - {key: recipient_address, label: "Почтовый адрес", type: text, required: true}
+      - {key: place_time, label: "Место и время ознакомления с материалами", type: text, required: true}
+    body: |
+      <table class="letter-head"><tr><td class="left small">{% if has.out_number %}Исх. № {{ v.out_number }}{% else %}Исх. № ________{% endif %}<br>от {{ v.doc_date }}</td><td class="right"><div class="addressee"><p>{{ pv('recipient', 'display_name') }}</p><p>{{ v.recipient_address }}</p></div></td></tr></table>
+      {{ m.title("УВЕДОМЛЕНИЕ", "об окончании следственных действий") }}
+      <p>В соответствии с ч. 2 ст. 215 УПК РФ уведомляю, что следственные действия по уголовному делу № {{ v.case_number }} окончены. Вы вправе ознакомиться с материалами уголовного дела в порядке ст. 216 УПК РФ: {{ v.place_time }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: case_materials_acquaintance_accused
+    title: "Протокол ознакомления обвиняемого и его защитника с материалами уголовного дела"
+    section: completion
+    kind: protocol
+    author: "Следователь"
+    stages: [completed]
+    keywords: [ознакомление с материалами, ст. 217, ст. 218, обвиняемый, защитник]
+    legal_bases:
+      - {key: "upk:217", reason: "Ознакомление обвиняемого и его защитника с материалами уголовного дела"}
+      - {key: "upk:218", reason: "Протокол ознакомления с материалами уголовного дела"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: accused, label: "Обвиняемый", type: participant, participant_role: "accused", required: true}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender"}
+      - {key: mode, label: "Порядок ознакомления", type: select, required: true, options: ["совместно с защитником", "раздельно с защитником"]}
+      - {key: volumes, label: "Количество томов и листов", type: text, required: true}
+      - {key: period, label: "Даты начала и окончания ознакомления", type: text, required: true, help: "ст. 218 УПК РФ"}
+      - {key: evidence_presented, label: "Предъявленные вещественные доказательства, записи", type: textarea}
+      - {key: petitions, label: "Заявленные ходатайства и иные заявления (с указанием, какие обстоятельства требуется установить)", type: textarea}
+      - {key: trial_petitions, label: "Позиция по ходатайствам, предусмотренным ч. 5 ст. 217 УПК РФ (присяжные, особый порядок, предварительное слушание)", type: textarea, required: true}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "ознакомления обвиняемого и его защитника с материалами уголовного дела") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии со ст. 215–218 УПК РФ предъявил обвиняемому {{ m.participant_details('accused') }}{% if has.defender %} и его защитнику {{ pv('defender', 'display_name') }}{% endif %} материалы уголовного дела № {{ v.case_number }} ({{ v.qualification }}) в {{ v.volumes }}. Ознакомление произведено {{ v.mode }}.</p>
+      <p>Период ознакомления: {{ v.period }}.</p>
+      {% if has.evidence_presented %}<p>Предъявлены вещественные доказательства: {{ v.evidence_presented }}</p>{% endif %}
+      <p>Обвиняемому разъяснены права, предусмотренные ч. 5 ст. 217 УПК РФ. Позиция обвиняемого: {{ v.trial_petitions }}</p>
+      <p>Ходатайства и заявления: {% if has.petitions %}{{ v.petitions }}{% else %}не заявлены.{% endif %}</p>
+      {{ m.sign("Обвиняемый", pv('accused', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: case_materials_acquaintance_victim
+    title: "Протокол ознакомления потерпевшего с материалами уголовного дела"
+    section: completion
+    kind: protocol
+    author: "Следователь"
+    stages: [completed]
+    keywords: [ознакомление потерпевшего, ст. 216]
+    legal_bases:
+      - {key: "upk:216", reason: "Ознакомление потерпевшего, гражданского истца, гражданского ответчика или их представителей с материалами"}
+      - {key: "upk:218", reason: "Протокол ознакомления"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: person, label: "Знакомящееся лицо", type: participant, participant_role: "victim|civil_plaintiff|civil_defendant|representative", required: true}
+      - {key: scope, label: "Объём ознакомления (полностью или частично; количество томов)", type: text, required: true}
+      - {key: period, label: "Даты начала и окончания ознакомления", type: text, required: true}
+      - {key: petitions, label: "Заявленные ходатайства", type: textarea}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "ознакомления с материалами уголовного дела") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии со ст. 216 УПК РФ предъявил {{ pv('person', 'role_label') }} {{ m.participant_details('person') }} материалы уголовного дела № {{ v.case_number }}: {{ v.scope }}. Период ознакомления: {{ v.period }}.</p>
+      <p>Ходатайства: {% if has.petitions %}{{ v.petitions }}{% else %}не заявлены.{% endif %}</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: termination
+    title: "Постановление о прекращении уголовного дела (уголовного преследования)"
+    section: completion
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation, suspended, completed]
+    keywords: [прекращение уголовного дела, прекращение уголовного преследования, примирение, деятельное раскаяние, реабилитация]
+    legal_bases:
+      - {key: "upk:24", reason: "Основания прекращения уголовного дела", mandatory: false}
+      - {key: "upk:27", reason: "Основания прекращения уголовного преследования", mandatory: false}
+      - {key: "upk:212", reason: "Основания прекращения уголовного дела и уголовного преследования"}
+      - {key: "upk:213", reason: "Порядок прекращения; содержание постановления; направление копии прокурору"}
+      - {key: "upk:25", reason: "Прекращение в связи с примирением сторон", mandatory: false}
+      - {key: "upk:28", reason: "Прекращение в связи с деятельным раскаянием", mandatory: false}
+    value_warnings:
+      ground:
+        "ст. 25 УПК РФ — в связи с примирением сторон": "Решение принимается следователем с согласия руководителя следственного органа при наличии условий ст. 76 УК РФ (ст. 25 УПК РФ)."
+        "ст. 28 УПК РФ — в связи с деятельным раскаянием": "Решение принимается следователем с согласия руководителя следственного органа при наличии условий ч. 1 ст. 75 УК РФ (ст. 28 УПК РФ)."
+        "п. 3 ч. 1 ст. 24 УПК РФ — в связи с истечением сроков давности уголовного преследования": "Прекращение по данному основанию не допускается, если подозреваемый (обвиняемый) против этого возражает (ч. 2 ст. 27 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: initiation_info, label: "Повод и основание возбуждения уголовного дела", type: textarea, required: true, help: "ч. 2 ст. 213 УПК РФ"}
+      - {key: results, label: "Результаты предварительного следствия с указанием данных о лицах, в отношении которых осуществлялось уголовное преследование", type: textarea, required: true, narrative: true}
+      - {key: measures, label: "Применявшиеся меры пресечения", type: text, required: true}
+      - {key: scope, label: "Решение", type: select, required: true, options: ["прекратить уголовное дело", "прекратить уголовное преследование"]}
+      - {key: person, label: "Лицо, в отношении которого прекращается преследование", type: participant, participant_role: "suspect|accused", condition: "scope == 'прекратить уголовное преследование'", required: true}
+      - {key: ground, label: "Основание прекращения", type: select, required: true, options: ["п. 1 ч. 1 ст. 24 УПК РФ — в связи с отсутствием события преступления", "п. 2 ч. 1 ст. 24 УПК РФ — в связи с отсутствием в деянии состава преступления", "п. 3 ч. 1 ст. 24 УПК РФ — в связи с истечением сроков давности уголовного преследования", "п. 4 ч. 1 ст. 24 УПК РФ — в связи со смертью подозреваемого (обвиняемого)", "п. 1 ч. 1 ст. 27 УПК РФ — в связи с непричастностью подозреваемого (обвиняемого) к совершению преступления", "ст. 25 УПК РФ — в связи с примирением сторон", "ст. 28 УПК РФ — в связи с деятельным раскаянием"]}
+      - {key: cancel_measures, label: "Решение об отмене меры пресечения, ареста имущества и иных мер", type: textarea, required: true}
+      - {key: evidence_fate, label: "Решение о вещественных доказательствах", type: textarea, required: true}
+      - {key: prosecutor, label: "Прокурор", type: text, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о прекращении уголовного дела (уголовного преследования)") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.initiation_info }} Уголовное дело возбуждено по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.results }}</p>
+      <p>Применявшиеся меры пресечения: {{ v.measures }}.</p>
+      <p>Таким образом, имеется основание для прекращения: {{ v.ground }}.</p>
+      <p>Руководствуясь ст. 212 и 213 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. {% if raw.scope == 'прекратить уголовное преследование' %}Прекратить уголовное преследование в отношении {{ m.participant_details('person') }}{% else %}Прекратить уголовное дело № {{ v.case_number }}{% endif %} на основании {{ v.ground }}.</p>
+      <p>2. {{ v.cancel_measures }}</p>
+      <p>3. {{ v.evidence_fate }}</p>
+      {% if raw.ground and (raw.ground.startswith('п. 1 ч. 1 ст. 24') or raw.ground.startswith('п. 2 ч. 1 ст. 24') or raw.ground.startswith('п. 1 ч. 1 ст. 27')) %}<p>4. Признать за лицом право на реабилитацию и направить ему извещение с разъяснением порядка возмещения вреда, связанного с уголовным преследованием (ст. 134 УПК РФ).</p>{% endif %}
+      <p>Копию настоящего постановления направить {{ v.prosecutor }}, вручить (направить) лицу, в отношении которого прекращено уголовное преследование, потерпевшему, гражданскому истцу и гражданскому ответчику. Постановление может быть обжаловано в порядке, установленном ст. 123–125 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: indictment
+    title: "Обвинительное заключение"
+    section: completion
+    kind: indictment
+    author: "Следователь"
+    addressee: "Прокурор"
+    stages: [completed]
+    requires_head_consent: true
+    keywords: [обвинительное заключение, направление прокурору, ст. 220]
+    legal_bases:
+      - {key: "upk:220", reason: "Обвинительное заключение: содержание, подписание, приложения, направление прокурору с согласия руководителя следственного органа"}
+      - {key: "upk:73", reason: "Обстоятельства, подлежащие доказыванию"}
+    warnings:
+      - "В обвинительном заключении должны быть указаны ссылки на тома и листы уголовного дела (ч. 2 ст. 220 УПК РФ)."
+      - "К обвинительному заключению прилагаются список лиц, подлежащих вызову в судебное заседание, и справка (ч. 4 ст. 220 УПК РФ)."
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: accused, label: "Обвиняемый", type: participant, participant_role: "accused", required: true}
+      - {key: personal_data, label: "Данные о личности обвиняемого (судимость, семейное положение, характеристики)", type: textarea, required: true}
+      - {key: charge_essence, label: "Существо обвинения: место и время, способы, мотивы, цели, последствия", type: textarea, required: true, narrative: true}
+      - {key: charge_formulation, label: "Формулировка предъявленного обвинения", type: textarea, required: true}
+      - {key: prosecution_evidence, label: "Доказательства обвинения и краткое содержание (с указанием тома и листа)", type: list, required: true}
+      - {key: defense_evidence, label: "Доказательства стороны защиты и краткое содержание", type: list}
+      - {key: mitigating, label: "Обстоятельства, смягчающие наказание", type: textarea, required: true}
+      - {key: aggravating, label: "Обстоятельства, отягчающие наказание", type: textarea, required: true}
+      - {key: victim_data, label: "Данные о потерпевшем, характере и размере вреда", type: textarea, required: true}
+      - {key: civil_data, label: "Данные о гражданском истце и гражданском ответчике", type: textarea}
+    body: |
+      {{ m.head_consent() }}
+      <div class="consent"><p class="right"><b>УТВЕРЖДАЮ</b></p><p class="right">Прокурор ______________________</p><p class="right">«___» ____________ 20__ г.</p></div>
+      {{ m.title("ОБВИНИТЕЛЬНОЕ ЗАКЛЮЧЕНИЕ", "по обвинению " ~ (pval('accused', 'display_name') or "") ~ " в совершении преступления, предусмотренного " ~ (raw.qualification or "")) }}
+      <p><b>Обвиняемый:</b> {{ m.participant_details('accused') }}.</p>
+      <p><b>Данные о личности:</b> {{ v.personal_data }}</p>
+      <p><b>Существо обвинения:</b> {{ v.charge_essence }}</p>
+      <p><b>Формулировка обвинения:</b> {{ v.charge_formulation }}, то есть преступление, предусмотренное {{ v.qualification }}.</p>
+      <p><b>Доказательства, подтверждающие обвинение:</b></p>
+      <p class="pre">{{ v.prosecution_evidence }}</p>
+      <p><b>Доказательства, на которые ссылается сторона защиты:</b></p>
+      {% if has.defense_evidence %}<p class="pre">{{ v.defense_evidence }}</p>{% else %}<p>Сторона защиты на доказательства не ссылалась.</p>{% endif %}
+      <p><b>Обстоятельства, смягчающие наказание:</b> {{ v.mitigating }}</p>
+      <p><b>Обстоятельства, отягчающие наказание:</b> {{ v.aggravating }}</p>
+      <p><b>Данные о потерпевшем, характере и размере вреда:</b> {{ v.victim_data }}</p>
+      {% if has.civil_data %}<p><b>Данные о гражданском истце и гражданском ответчике:</b> {{ v.civil_data }}</p>{% endif %}
+      <p>Обвинительное заключение составлено {{ vl.doc_date }}, {{ v.city }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: indictment_reference
+    title: "Справка к обвинительному заключению"
+    section: completion
+    kind: indictment
+    author: "Следователь"
+    stages: [completed]
+    keywords: [справка к обвинительному заключению, сроки следствия]
+    legal_bases:
+      - {key: "upk:220", reason: "Справка, прилагаемая к обвинительному заключению (ч. 4 ст. 220 УПК РФ)"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: terms, label: "Сроки следствия (возбуждение, продления, приостановления)", type: textarea, required: true}
+      - {key: measures, label: "Избранные меры пресечения с указанием времени содержания под стражей и домашнего ареста", type: textarea, required: true}
+      - {key: evidence, label: "Вещественные доказательства и место их хранения", type: textarea, required: true}
+      - {key: civil_claim, label: "Гражданский иск, меры по обеспечению иска и возможной конфискации", type: textarea, required: true}
+      - {key: costs, label: "Процессуальные издержки", type: textarea, required: true}
+      - {key: dependants, label: "Меры по обеспечению прав иждивенцев обвиняемого, потерпевшего (при наличии)", type: textarea}
+    body: |
+      {{ m.title("СПРАВКА", "к обвинительному заключению по уголовному делу № " ~ (raw.case_number or "")) }}
+      <p>1. Сроки следствия: {{ v.terms }}</p>
+      <p>2. Меры пресечения: {{ v.measures }}</p>
+      <p>3. Вещественные доказательства: {{ v.evidence }}</p>
+      <p>4. Гражданский иск и меры обеспечения: {{ v.civil_claim }}</p>
+      <p>5. Процессуальные издержки: {{ v.costs }}</p>
+      {% if has.dependants %}<p>6. Меры по обеспечению прав иждивенцев: {{ v.dependants }}</p>{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: summon_list
+    title: "Список лиц, подлежащих вызову в судебное заседание"
+    section: completion
+    kind: indictment
+    author: "Следователь"
+    stages: [completed]
+    keywords: [список лиц, вызов в суд, приложение к обвинительному заключению]
+    legal_bases:
+      - {key: "upk:220", reason: "Список лиц, подлежащих вызову в судебное заседание (ч. 4 ст. 220 УПК РФ)"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: prosecution_list, label: "Лица со стороны обвинения (ФИО, адрес, том и лист)", type: list, required: true}
+      - {key: defense_list, label: "Лица со стороны защиты (ФИО, адрес, том и лист)", type: list}
+    body: |
+      {{ m.title("СПИСОК", "лиц, подлежащих вызову в судебное заседание, по уголовному делу № " ~ (raw.case_number or "")) }}
+      <p><b>Со стороны обвинения:</b></p>
+      <p class="pre">{{ v.prosecution_list }}</p>
+      <p><b>Со стороны защиты:</b></p>
+      {% if has.defense_list %}<p class="pre">{{ v.defense_list }}</p>{% else %}<p>Не указаны.</p>{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: case_inventory
+    title: "Опись документов уголовного дела (тома)"
+    section: completion
+    kind: inventory
+    author: "Следователь"
+    stages: [investigation, completed]
+    keywords: [опись документов, опись тома]
+    legal_bases: []
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: volume, label: "Номер тома", type: text, required: true}
+      - {key: items, label: "Документы: наименование, дата, листы (каждый с новой строки)", type: list, required: true}
+    body: |
+      {{ m.title("ОПИСЬ", "документов уголовного дела № " ~ (raw.case_number or "") ~ ", том " ~ (raw.volume or "")) }}
+      <p class="pre">{{ v.items }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: case_to_prosecutor_letter
+    title: "Сопроводительное письмо о направлении уголовного дела прокурору"
+    section: completion
+    kind: letter
+    author: "Следователь"
+    addressee: "Прокурор"
+    stages: [completed]
+    requires_head_consent: true
+    keywords: [направление дела прокурору, сопроводительное, обвинительное заключение]
+    legal_bases:
+      - {key: "upk:220", reason: "Направление уголовного дела прокурору после подписания обвинительного заключения с согласия руководителя следственного органа (ч. 6 ст. 220 УПК РФ)"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_ref
+      - {key: accused, label: "Обвиняемый", type: participant, participant_role: "accused", required: true}
+      - {key: volumes, label: "Количество томов", type: text, required: true}
+      - {key: attachments, label: "Прилагаемые материалы и вещественные доказательства", type: list}
+    body: |
+      {{ m.letter_head() }}
+      <p>В соответствии с ч. 6 ст. 220 УПК РФ направляю уголовное дело № {{ v.case_number }} по обвинению {{ pv('accused', 'display_name') }} в совершении преступления, предусмотренного {{ v.qualification }}, с обвинительным заключением.</p>
+      <p>Приложение: уголовное дело в {{ v.volumes }} т.{% if has.attachments %};{% endif %}</p>
+      {% if has.attachments %}<p class="pre">{{ v.attachments }}</p>{% endif %}
+      {{ m.investigator_sign() }}

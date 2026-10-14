@@ -1,0 +1,267 @@
+# Раздел 4.4. Решения в отношении участников
+documents:
+  - code: victim_recognition
+    title: "Постановление о признании потерпевшим"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [признание потерпевшим, потерпевший, признать потерпевшим]
+    legal_bases:
+      - {key: "upk:42", reason: "Признание лица потерпевшим; права и обязанности потерпевшего"}
+    warnings:
+      - "Решение о признании потерпевшим принимается незамедлительно с момента возбуждения уголовного дела (ч. 1 ст. 42 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: victim, label: "Лицо, признаваемое потерпевшим", type: participant, participant_role: "victim", required: true}
+      - {key: circumstances, label: "Обстоятельства преступления", type: textarea, required: true, narrative: true}
+      - {key: harm, label: "Характер причинённого вреда", type: select, required: true, options: ["физический вред", "имущественный вред", "моральный вред", "физический и моральный вред", "имущественный и моральный вред", "вред имуществу и деловой репутации (юридическое лицо)"]}
+      - {key: harm_details, label: "Сведения о размере (характере) вреда", type: textarea}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о признании потерпевшим") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>Преступлением {{ pv('victim', 'display_name') }} причинён {{ v.harm }}{% if has.harm_details %}: {{ v.harm_details }}{% endif %}.</p>
+      <p>Руководствуясь ст. 42 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Признать {{ m.participant_details('victim') }} потерпевшим по уголовному делу № {{ v.case_number }}.</p>
+      <p>2. Разъяснить потерпевшему права и обязанности, предусмотренные ст. 42 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>Настоящее постановление мне объявлено, права и обязанности, предусмотренные ст. 42 УПК РФ, разъяснены, копию постановления получил(-а).</p>
+      <p>«___» ____________ 20__ г.</p>
+      {{ m.sign("Потерпевший", pv('victim', 'short_name')) }}
+
+  - code: civil_plaintiff
+    title: "Постановление о признании гражданским истцом"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [гражданский истец, гражданский иск, признание гражданским истцом]
+    legal_bases:
+      - {key: "upk:44", reason: "Гражданский истец"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: plaintiff, label: "Гражданский истец", type: participant, participant_role: "civil_plaintiff|victim", required: true}
+      - {key: claim_date, label: "Дата предъявления гражданского иска", type: date, required: true}
+      - {key: claim_amount, label: "Размер исковых требований", type: text, required: true}
+      - {key: claim_basis, label: "Существо исковых требований", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о признании гражданским истцом") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.claim_date }} {{ pv('plaintiff', 'display_name') }} предъявлен гражданский иск на сумму {{ v.claim_amount }}. {{ v.claim_basis }}</p>
+      <p>Руководствуясь ст. 44 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Признать {{ m.participant_details('plaintiff') }} гражданским истцом по уголовному делу № {{ v.case_number }}.</p>
+      <p>2. Разъяснить гражданскому истцу права и обязанности, предусмотренные ст. 44 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление объявлено, права разъяснены «___» ____________ 20__ г.</p>
+      {{ m.sign("Гражданский истец", pv('plaintiff', 'short_name')) }}
+
+  - code: civil_defendant
+    title: "Постановление о привлечении в качестве гражданского ответчика"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [гражданский ответчик]
+    legal_bases:
+      - {key: "upk:54", reason: "Гражданский ответчик"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: defendant, label: "Гражданский ответчик (физическое или юридическое лицо)", type: participant, participant_role: "civil_defendant", required: true}
+      - {key: liability_basis, label: "Основание ответственности за вред, причинённый преступлением", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о привлечении в качестве гражданского ответчика") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.liability_basis }}</p>
+      <p>Руководствуясь ст. 54 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Привлечь {{ m.participant_details('defendant') }} в качестве гражданского ответчика по уголовному делу № {{ v.case_number }}.</p>
+      <p>2. Разъяснить гражданскому ответчику права и обязанности, предусмотренные ст. 54 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: accusation
+    title: "Постановление о привлечении в качестве обвиняемого"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [привлечение в качестве обвиняемого, предъявление обвинения, обвиняемый]
+    legal_bases:
+      - {key: "upk:171", reason: "Порядок привлечения в качестве обвиняемого; содержание постановления (ч. 2 ст. 171 УПК РФ)"}
+      - {key: "upk:172", reason: "Порядок предъявления обвинения"}
+      - {key: "upk:73", reason: "Обстоятельства, подлежащие доказыванию"}
+      - {key: "upk:47", reason: "Права обвиняемого"}
+    warnings:
+      - "Обвинение предъявляется не позднее 3 суток со дня вынесения постановления (ч. 1 ст. 172 УПК РФ)."
+      - "Описание преступления должно содержать время, место и иные обстоятельства, подлежащие доказыванию по п. 1–4 ч. 1 ст. 73 УПК РФ."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: accused, label: "Лицо, привлекаемое в качестве обвиняемого", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: crime_description, label: "Описание преступления (время, место, способ, мотив, последствия)", type: textarea, required: true, narrative: true}
+      - {key: legal_formulation, label: "Юридическая формулировка обвинения (признаки состава)", type: textarea, required: true}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о привлечении в качестве обвиняемого") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, установив, что имеются достаточные доказательства, дающие основания для обвинения {{ pv('accused', 'display_name') }}, {{ pv('accused', 'birth_date', true) }} года рождения, уроженца(-ки) {{ pv('accused', 'birth_place', true) }}, в совершении преступления,</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.crime_description }}</p>
+      <p>Таким образом, {{ pv('accused', 'display_name') }} {{ v.legal_formulation }}, то есть совершил(-а) преступление, предусмотренное {{ v.qualification }}.</p>
+      <p>На основании изложенного, руководствуясь ст. 171 и 172 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Привлечь {{ pv('accused', 'display_name') }}, {{ pv('accused', 'birth_date', true) }} года рождения, в качестве обвиняемого по уголовному делу № {{ v.case_number }}, предъявив ему обвинение в совершении преступления, предусмотренного {{ v.qualification }}, о чём объявить обвиняемому.</p>
+      <p>2. Копию настоящего постановления вручить обвиняемому и его защитнику, направить прокурору.</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление мне объявлено «___» ____________ 20__ г. в ___ ч ___ мин. Сущность обвинения разъяснена, права обвиняемого, предусмотренные ст. 47 УПК РФ, разъяснены. Копию постановления получил(-а).</p>
+      {{ m.sign("Обвиняемый", pv('accused', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      <p>Постановление объявлено, сущность обвинения разъяснена «___» ____________ 20__ г.</p>
+      {{ m.investigator_sign() }}
+
+  - code: interpreter_appointment
+    title: "Постановление о назначении переводчика"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [переводчик, назначение переводчика, язык]
+    legal_bases:
+      - {key: "upk:18", reason: "Язык уголовного судопроизводства"}
+      - {key: "upk:59", reason: "Переводчик; вынесение постановления о назначении (ч. 2 ст. 59 УПК РФ)"}
+      - {key: "upk:169", reason: "Участие переводчика в следственных действиях"}
+      - {key: "uk:307", reason: "Предупреждение переводчика об ответственности за заведомо неправильный перевод"}
+    fields:
+      - use: header
+      - {key: subject, label: "Уголовное дело (материал проверки)", type: text, required: true, binding: case.case_number}
+      - {key: person_needing, label: "Участник, не владеющий (недостаточно владеющий) языком судопроизводства", type: participant, participant_role: "suspect|accused|victim|witness|applicant|other", required: true}
+      - {key: language, label: "Язык перевода", type: text, required: true}
+      - {key: interpreter, label: "Переводчик", type: participant, participant_role: "interpreter", required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о назначении переводчика") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы {{ v.subject }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ pv('person_needing', 'display_name') }} ({{ pv('person_needing', 'role_label') }}) не владеет или недостаточно владеет языком, на котором ведётся производство по уголовному делу, и нуждается в услугах переводчика с языка: {{ v.language }}.</p>
+      <p>Руководствуясь ст. 18, 59 и 169 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Назначить {{ m.participant_details('interpreter') }} переводчиком по уголовному делу ({{ v.language }}).</p>
+      <p>2. Разъяснить переводчику права и ответственность, предусмотренные ст. 59 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>Права и обязанности, предусмотренные ст. 59 УПК РФ, мне разъяснены. Об уголовной ответственности за заведомо неправильный перевод по ст. 307 УК РФ предупреждён(-а).</p>
+      {{ m.sign("Переводчик", pv('interpreter', 'short_name')) }}
+
+  - code: legal_representative_admission
+    title: "Постановление о допуске законного представителя несовершеннолетнего подозреваемого (обвиняемого)"
+    section: participants
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [законный представитель, несовершеннолетний]
+    legal_bases:
+      - {key: "upk:48", reason: "Законные представители несовершеннолетнего подозреваемого и обвиняемого"}
+      - {key: "upk:426", reason: "Допуск законного представителя на основании постановления с момента первого допроса"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: minor, label: "Несовершеннолетний подозреваемый (обвиняемый)", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: representative, label: "Законный представитель", type: participant, participant_role: "legal_representative", required: true}
+      - {key: relation, label: "Основание представительства (родитель, усыновитель, опекун, попечитель и т. п.)", type: text, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о допуске законного представителя несовершеннолетнего") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>По уголовному делу в качестве {{ pv('minor', 'role_label') }} привлечён несовершеннолетний {{ m.participant_details('minor') }}. Его законным представителем является {{ pv('representative', 'display_name') }} ({{ v.relation }}).</p>
+      <p>Руководствуясь ст. 48 и 426 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Допустить {{ m.participant_details('representative') }} к участию в уголовном деле в качестве законного представителя несовершеннолетнего {{ pv('minor', 'display_name') }}.</p>
+      <p>2. Разъяснить законному представителю права, предусмотренные ст. 426 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+      <p>Права разъяснены «___» ____________ 20__ г.</p>
+      {{ m.sign("Законный представитель", pv('representative', 'short_name')) }}
+
+  - code: nondisclosure_undertaking
+    title: "Подписка о неразглашении данных предварительного расследования"
+    section: participants
+    kind: form
+    author: "Участник уголовного судопроизводства (отбирается следователем)"
+    stages: [investigation]
+    keywords: [неразглашение, подписка, тайна следствия]
+    legal_bases:
+      - {key: "upk:161", reason: "Недопустимость разглашения данных предварительного расследования"}
+      - {key: "uk:310", reason: "Ответственность за разглашение данных предварительного расследования"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: person, label: "Лицо, дающее подписку", type: participant, participant_role: "victim|witness|suspect|accused|defender|representative|legal_representative|expert|specialist|interpreter|civil_plaintiff|civil_defendant|other", required: true}
+    body: |
+      {{ m.title("ПОДПИСКА", "о неразглашении данных предварительного расследования") }}
+      {{ m.place_date() }}
+      <p>Я, {{ m.participant_details('person') }}, участвующий(-ая) в уголовном деле № {{ v.case_number }} в качестве {{ pv('person', 'role_label') }}, предупреждён(-а) следователем {{ v.investigator_name }} о недопустимости разглашения без соответствующего разрешения ставших мне известными данных предварительного расследования в соответствии со ст. 161 УПК РФ, а также об уголовной ответственности за их разглашение по ст. 310 УК РФ.</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      <p>Подписку отобрал:</p>
+      {{ m.investigator_sign() }}
+
+  - code: defender_waiver
+    title: "Заявление об отказе от защитника (бланк)"
+    section: participants
+    kind: form
+    author: "Подозреваемый (обвиняемый)"
+    stages: [investigation]
+    keywords: [отказ от защитника, защитник, ст. 52]
+    legal_bases:
+      - {key: "upk:52", reason: "Отказ от защитника заявляется в письменном виде; не обязателен для следователя"}
+    warnings:
+      - "Отказ от защитника допускается только по инициативе подозреваемого (обвиняемого) и не обязателен для следователя (ст. 52 УПК РФ). Проверьте случаи обязательного участия защитника (ст. 51 УПК РФ)."
+    fields:
+      - {key: doc_date, label: "Дата", type: date, required: true, binding: today}
+      - {key: city, label: "Место", type: text, required: true, binding: case.city}
+      - use: case_number_only
+      - {key: person, label: "Подозреваемый (обвиняемый)", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: investigator_name, label: "Следователь", type: text, required: true, binding: case.investigator_name}
+    body: |
+      <div class="addressee"><p>Следователю {{ v.investigator_name }}</p><p>от {{ pv('person', 'role_label') }} {{ pv('person', 'display_name') }}</p></div>
+      {{ m.title("ЗАЯВЛЕНИЕ") }}
+      <p>По уголовному делу № {{ v.case_number }} от услуг защитника отказываюсь. Отказ заявлен мною добровольно, по собственной инициативе и не связан с материальным положением. Мне разъяснено, что отказ от защитника не обязателен для следователя и что я вправе в любой момент производства по уголовному делу пригласить защитника (ст. 52 УПК РФ).</p>
+      <p>________________________________________________________________ (собственноручная запись)</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      <p>{{ v.doc_date }}</p>
+
+  - code: decision_notice
+    title: "Уведомление участника о принятом процессуальном решении"
+    section: participants
+    kind: notice
+    author: "Следователь"
+    stages: [check, investigation, suspended, completed, terminated]
+    keywords: [уведомление, процессуальное решение, обжалование]
+    legal_bases:
+      - {key: "upk:123", reason: "Право обжалования процессуальных решений"}
+      - {key: "upk:124", reason: "Порядок рассмотрения жалобы руководителем следственного органа, прокурором"}
+      - {key: "upk:125", reason: "Судебный порядок рассмотрения жалоб"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: case_number_only
+      - {key: recipient, label: "Адресат уведомления", type: participant, participant_role: "victim|suspect|accused|defender|representative|legal_representative|civil_plaintiff|civil_defendant|applicant|witness|other", required: true}
+      - {key: recipient_address, label: "Почтовый адрес адресата", type: text, required: true}
+      - {key: decision, label: "Принятое решение (наименование и дата)", type: text, required: true}
+      - {key: decision_summary, label: "Краткое содержание решения", type: textarea}
+    body: |
+      <table class="letter-head"><tr><td class="left small">{% if has.out_number %}Исх. № {{ v.out_number }}{% else %}Исх. № ________{% endif %}<br>от {{ v.doc_date }}</td><td class="right"><div class="addressee"><p>{{ pv('recipient', 'display_name') }}</p><p>{{ v.recipient_address }}</p></div></td></tr></table>
+      {{ m.title("УВЕДОМЛЕНИЕ") }}
+      <p>Уведомляю Вас о том, что по уголовному делу № {{ v.case_number }} принято решение: {{ v.decision }}.</p>
+      {% if has.decision_summary %}<p>{{ v.decision_summary }}</p>{% endif %}
+      <p>Данное решение может быть обжаловано руководителю следственного органа, прокурору или в суд в порядке, установленном ст. 123–125 УПК РФ.</p>
+      {{ m.investigator_sign() }}

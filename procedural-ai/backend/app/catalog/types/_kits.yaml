@@ -1,0 +1,53 @@
+# Комплекты связанных документов для типовых процессуальных ситуаций.
+# Каждый документ комплекта формируется отдельно и требует самостоятельной проверки.
+kits:
+  - code: initiation_kit
+    title: "Возбуждение уголовного дела"
+    description: "Решение по сообщению о преступлении, направление копии прокурору, уведомление заявителя, признание потерпевшим."
+    stages: [check]
+    documents: [initiation, cover_prosecutor_decision, applicant_decision_notice, victim_recognition]
+  - code: refusal_kit
+    title: "Отказ в возбуждении уголовного дела"
+    description: "Постановление об отказе, направление копии прокурору и уведомление заявителя."
+    stages: [check]
+    documents: [refusal_initiation, cover_prosecutor_decision, applicant_decision_notice]
+  - code: detention_kit
+    title: "Задержание подозреваемого"
+    description: "Протокол задержания, сообщение прокурору, уведомление родственников, допрос подозреваемого."
+    stages: [investigation]
+    documents: [detention_protocol, detention_prosecutor_notice, detention_relatives_notice, interrogation_suspect]
+  - code: custody_kit
+    title: "Избрание меры пресечения в виде заключения под стражу"
+    description: "Постановление о возбуждении ходатайства, опись прилагаемых материалов, сопроводительное письмо в суд."
+    stages: [investigation]
+    documents: [custody_petition, annex_inventory, court_cover_letter]
+  - code: accusation_kit
+    title: "Предъявление обвинения"
+    description: "Постановление о привлечении в качестве обвиняемого и протокол допроса обвиняемого."
+    stages: [investigation]
+    documents: [accusation, interrogation_accused]
+  - code: expertise_kit
+    title: "Назначение судебной экспертизы"
+    description: "Постановление о назначении экспертизы, протокол ознакомления, сопроводительное письмо, опись объектов."
+    stages: [investigation]
+    documents: [expertise_order, expertise_order_acquaintance, expertise_cover_letter, objects_transfer_inventory]
+  - code: search_kit
+    title: "Обыск в нежилом помещении"
+    description: "Постановление о производстве обыска, протокол обыска, опись изъятого."
+    stages: [investigation]
+    documents: [search_resolution, search_protocol, items_inventory]
+  - code: evidence_kit
+    title: "Оформление вещественных доказательств"
+    description: "Протокол осмотра предметов, постановление о признании вещественными доказательствами, передача на хранение."
+    stages: [investigation]
+    documents: [object_inspection, material_evidence, evidence_storage_transfer]
+  - code: completion_kit
+    title: "Окончание предварительного следствия с обвинительным заключением"
+    description: "Уведомления об окончании, протоколы ознакомления, обвинительное заключение с приложениями, направление прокурору."
+    stages: [investigation, completed]
+    documents: [completion_notice_protocol, completion_notice_participants, case_materials_acquaintance_victim, case_materials_acquaintance_accused, indictment, indictment_reference, summon_list, case_to_prosecutor_letter]
+  - code: suspension_kit
+    title: "Приостановление предварительного следствия"
+    description: "Постановление о приостановлении, поручение органу дознания, уведомление участников."
+    stages: [investigation]
+    documents: [suspension, inquiry_body_order, decision_notice]

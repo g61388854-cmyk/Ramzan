@@ -1,0 +1,707 @@
+# Раздел 4.3. Протоколы следственных действий и связанные постановления
+documents:
+  - code: scene_inspection
+    title: "Протокол осмотра места происшествия"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [осмотр места происшествия, ОМП, место происшествия]
+    legal_bases:
+      - {key: "upk:164", reason: "Общие правила производства следственных действий"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+      - {key: "upk:170", reason: "Участие понятых либо применение технических средств фиксации"}
+      - {key: "upk:176", reason: "Основания производства осмотра; допустимость осмотра места происшествия до возбуждения уголовного дела"}
+      - {key: "upk:177", reason: "Порядок производства осмотра"}
+      - {key: "upk:180", reason: "Протоколы осмотра и освидетельствования"}
+    fields:
+      - use: protocol_core
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: inspection_basis, label: "Основание осмотра (сообщение о преступлении, уголовное дело)", type: text, required: true, group: "Содержание", help: "Например: сообщение о преступлении КУСП № ... от ..."}
+      - {key: conditions, label: "Условия осмотра (погода, освещение, температура)", type: text, group: "Содержание"}
+      - {key: object_description, label: "Ход осмотра и описание обнаруженного (в последовательности производства)", type: textarea, required: true, group: "Содержание", help: "ч. 2 ст. 180 УПК РФ: описываются все действия следователя и всё обнаруженное в той последовательности, в какой производился осмотр, и в том виде, в каком обнаруженное наблюдалось"}
+      - {key: seized, label: "Изъятые предметы, документы, следы и способ их упаковки", type: list, group: "Изъятие"}
+      - {key: attachments, label: "Приложения к протоколу (фототаблица, схема, носители)", type: list, group: "Приложения"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "осмотра места происшествия") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} на основании {{ v.inspection_basis }} в соответствии со ст. 164, 176, 177 и 180 УПК РФ произвёл осмотр места происшествия.</p>
+      {{ m.protocol_participants_block() }}
+      {% if has.conditions %}<p>Осмотр производился в условиях: {{ v.conditions }}.</p>{% endif %}
+      <p><b>Осмотром установлено:</b></p>
+      <p>{{ v.object_description }}</p>
+      {% if has.seized %}<p><b>С места происшествия изъято:</b></p><p class="pre">{{ v.seized }}</p>{% else %}<p>В ходе осмотра ничего не изымалось.</p>{% endif %}
+      {% if has.attachments %}<p><b>К протоколу прилагаются:</b></p><p class="pre">{{ v.attachments }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>Участвующие лица:</p>
+      <p class="pre">_______________________________________________</p>
+      {{ m.investigator_sign() }}
+
+  - code: object_inspection
+    title: "Протокол осмотра предметов (документов)"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [check, investigation]
+    specializations: [cyber]
+    keywords: [осмотр предметов, осмотр документов, осмотр вещественных доказательств]
+    legal_bases:
+      - {key: "upk:164", reason: "Общие правила производства следственных действий"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+      - {key: "upk:176", reason: "Основания производства осмотра"}
+      - {key: "upk:177", reason: "Порядок производства осмотра"}
+      - {key: "upk:180", reason: "Протокол осмотра"}
+    fields:
+      - use: protocol_core
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: object_origin, label: "Откуда поступили осматриваемые предметы (документы)", type: text, required: true, group: "Объект осмотра", help: "Например: изъяты в ходе выемки 12.03.2026"}
+      - {key: packaging_before, label: "Состояние упаковки до вскрытия", type: textarea, required: true, group: "Объект осмотра"}
+      - {key: object_description, label: "Описание осматриваемых предметов (документов) и их индивидуальных признаков", type: textarea, required: true, group: "Содержание"}
+      - {key: inspection_result, label: "Обстоятельства, имеющие значение для дела, установленные осмотром", type: textarea, group: "Содержание"}
+      - {key: packaging_after, label: "Упаковка после осмотра", type: textarea, required: true, group: "Окончание"}
+      - {key: attachments, label: "Приложения", type: list, group: "Приложения"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "осмотра предметов (документов)") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} в соответствии со ст. 164, 176, 177 и 180 УПК РФ произвёл осмотр предметов (документов), поступивших следующим образом: {{ v.object_origin }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>До вскрытия упаковка находится в следующем состоянии: {{ v.packaging_before }}</p>
+      <p><b>Осмотром установлено:</b></p>
+      <p>{{ v.object_description }}</p>
+      {% if has.inspection_result %}<p>{{ v.inspection_result }}</p>{% endif %}
+      <p>После осмотра предметы (документы) упакованы: {{ v.packaging_after }}</p>
+      {% if has.attachments %}<p><b>К протоколу прилагаются:</b></p><p class="pre">{{ v.attachments }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      {{ m.investigator_sign() }}
+
+  - code: corpse_inspection
+    title: "Протокол осмотра трупа"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [осмотр трупа, труп, судебно-медицинский эксперт]
+    legal_bases:
+      - {key: "upk:178", reason: "Осмотр трупа с участием судебно-медицинского эксперта, а при невозможности его участия — врача"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+      - {key: "upk:180", reason: "Протокол осмотра"}
+    fields:
+      - use: protocol_core
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: forensic_participant, label: "Судебно-медицинский эксперт (врач) — должность, фамилия, инициалы", type: text, required: true, group: "Участники следственного действия", help: "ч. 1 ст. 178 УПК РФ"}
+      - {key: identity, label: "Сведения о личности умершего (если установлена) либо отметка «личность не установлена»", type: text, required: true, group: "Объект осмотра"}
+      - {key: position_description, label: "Расположение и поза трупа, окружающая обстановка", type: textarea, required: true, group: "Содержание"}
+      - {key: clothing, label: "Одежда и предметы при трупе", type: textarea, group: "Содержание"}
+      - {key: external_findings, label: "Наружные признаки: трупные явления, повреждения, следы", type: textarea, required: true, group: "Содержание"}
+      - {key: seized, label: "Изъятые предметы и способ их упаковки", type: list, group: "Изъятие"}
+      - {key: corpse_destination, label: "Куда направлен труп", type: text, required: true, group: "Окончание"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "осмотра трупа") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} с участием {{ v.forensic_participant }} в соответствии со ст. 164, 177, 178 и 180 УПК РФ произвёл наружный осмотр трупа.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Сведения о личности: {{ v.identity }}.</p>
+      <p><b>Осмотром установлено:</b></p>
+      <p>{{ v.position_description }}</p>
+      {% if has.clothing %}<p>{{ v.clothing }}</p>{% endif %}
+      <p>{{ v.external_findings }}</p>
+      {% if has.seized %}<p><b>Изъято:</b></p><p class="pre">{{ v.seized }}</p>{% endif %}
+      <p>По окончании осмотра труп направлен: {{ v.corpse_destination }}.</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign("Судебно-медицинский эксперт (врач)", "") }}
+      {{ m.investigator_sign() }}
+
+  - code: examination_resolution
+    title: "Постановление о производстве освидетельствования"
+    section: protocols
+    kind: resolution
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [освидетельствование, постановление об освидетельствовании]
+    legal_bases:
+      - {key: "upk:179", reason: "Основания и порядок освидетельствования; постановление обязательно для освидетельствуемого"}
+    fields:
+      - use: header
+      - {key: subject, label: "Уголовное дело (материал проверки)", type: text, required: true, binding: case.case_number}
+      - {key: person, label: "Освидетельствуемое лицо", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: purpose, label: "Цель освидетельствования", type: textarea, required: true, help: "Обнаружение на теле особых примет, следов преступления, телесных повреждений, выявление состояния опьянения или иных свойств и признаков (ч. 1 ст. 179 УПК РФ)"}
+      - {key: reasons, label: "Обоснование", type: textarea, required: true}
+      - {key: doctor, label: "Врач (специалист), привлекаемый к освидетельствованию", type: text}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о производстве освидетельствования") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы {{ v.subject }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 179 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Произвести освидетельствование {{ m.participant_details('person') }} в целях: {{ v.purpose }}</p>
+      {% if has.doctor %}<p>2. К производству освидетельствования привлечь {{ v.doctor }}.</p>{% endif %}
+      <p>Постановление является обязательным для освидетельствуемого лица (ч. 2 ст. 179 УПК РФ).</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление мне объявлено «___» ____________ 20__ г.</p>
+      {{ m.sign("Освидетельствуемый", pv('person', 'short_name')) }}
+
+  - code: examination_protocol
+    title: "Протокол освидетельствования"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [освидетельствование, протокол освидетельствования, телесные повреждения]
+    legal_bases:
+      - {key: "upk:179", reason: "Порядок освидетельствования"}
+      - {key: "upk:180", reason: "Протокол освидетельствования"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    warnings:
+      - "При освидетельствовании лица другого пола, сопровождающемся обнажением, следователь не присутствует; освидетельствование производится врачом (ч. 4 ст. 179 УПК РФ)."
+    fields:
+      - use: protocol_core
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: person, label: "Освидетельствуемое лицо", type: participant, participant_role: "suspect|accused|victim|witness", required: true, group: "Объект"}
+      - {key: resolution_date, label: "Дата постановления о производстве освидетельствования", type: date, required: true, group: "Объект"}
+      - {key: findings, label: "Результаты освидетельствования (обнаруженные приметы, следы, повреждения)", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "освидетельствования") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} на основании постановления от {{ v.resolution_date }} в соответствии со ст. 164, 179 и 180 УПК РФ произвёл освидетельствование {{ m.participant_details('person') }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p><b>В ходе освидетельствования установлено:</b></p>
+      <p>{{ v.findings }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign("Освидетельствуемый", pv('person', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: interrogation_witness
+    title: "Протокол допроса свидетеля"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [допрос свидетеля, свидетель, показания]
+    legal_bases:
+      - {key: "upk:56", reason: "Процессуальное положение свидетеля, его права и обязанности"}
+      - {key: "upk:79", reason: "Показания свидетеля"}
+      - {key: "upk:187", reason: "Место и время допроса"}
+      - {key: "upk:189", reason: "Общие правила проведения допроса"}
+      - {key: "upk:190", reason: "Протокол допроса"}
+      - {key: "konst:51", reason: "Право не свидетельствовать против себя и близких родственников"}
+      - {key: "uk:307", reason: "Предупреждение об ответственности за дачу заведомо ложных показаний"}
+      - {key: "uk:308", reason: "Предупреждение об ответственности за отказ от дачи показаний"}
+    warnings:
+      - "Показания записываются от первого лица и по возможности дословно (ч. 2 ст. 190 УПК РФ). Система не формирует текст показаний."
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: witness, label: "Свидетель", type: participant, participant_role: "witness", required: true, group: "Допрашиваемое лицо"}
+      - {key: relation, label: "Отношение к подозреваемому (обвиняемому), потерпевшему", type: text, group: "Допрашиваемое лицо"}
+      - {key: language, label: "Язык, на котором желает давать показания; нуждается ли в переводчике", type: text, required: true, group: "Допрашиваемое лицо", help: "ст. 18 УПК РФ"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: testimony, label: "Показания свидетеля (от первого лица)", type: textarea, required: true, group: "Показания"}
+      - {key: qa, label: "Вопросы и ответы", type: textarea, group: "Показания"}
+      - {key: presented_materials, label: "Предъявленные доказательства, оглашённые протоколы, воспроизведённые записи", type: textarea, group: "Показания"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "допроса свидетеля") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164, 187–190 УПК РФ допросил в качестве свидетеля:</p>
+      {{ m.participant_card('witness') }}
+      {% if has.relation %}<p>Отношение к подозреваемому (обвиняемому), потерпевшему: {{ v.relation }}.</p>{% endif %}
+      <p>Язык, на котором желает давать показания: {{ v.language }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Свидетелю разъяснены права и обязанности, предусмотренные ст. 56 УПК РФ, а также положения ст. 51 Конституции Российской Федерации, согласно которой никто не обязан свидетельствовать против себя самого, своего супруга и близких родственников, круг которых определяется федеральным законом.</p>
+      {{ m.sign("Свидетель", pv('witness', 'short_name')) }}
+      <p>Свидетель предупреждён об уголовной ответственности за отказ от дачи показаний по ст. 308 УК РФ и за дачу заведомо ложных показаний по ст. 307 УК РФ.</p>
+      {{ m.sign("Свидетель", pv('witness', 'short_name')) }}
+      <p>По существу уголовного дела свидетель показал следующее:</p>
+      <p>{{ v.testimony }}</p>
+      {% if has.qa %}<p class="pre">{{ v.qa }}</p>{% endif %}
+      {% if has.presented_materials %}<p>В ходе допроса свидетелю предъявлено (оглашено, воспроизведено): {{ v.presented_materials }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>С моих слов записано верно.</p>
+      {{ m.sign("Свидетель", pv('witness', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: interrogation_victim
+    title: "Протокол допроса потерпевшего"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [допрос потерпевшего, потерпевший, показания]
+    legal_bases:
+      - {key: "upk:42", reason: "Права и обязанности потерпевшего"}
+      - {key: "upk:187", reason: "Место и время допроса"}
+      - {key: "upk:189", reason: "Общие правила проведения допроса"}
+      - {key: "upk:190", reason: "Протокол допроса"}
+      - {key: "konst:51", reason: "Право не свидетельствовать против себя и близких родственников"}
+      - {key: "uk:307", reason: "Предупреждение об ответственности за дачу заведомо ложных показаний"}
+      - {key: "uk:308", reason: "Предупреждение об ответственности за отказ от дачи показаний"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: victim, label: "Потерпевший", type: participant, participant_role: "victim", required: true, group: "Допрашиваемое лицо"}
+      - {key: language, label: "Язык, на котором желает давать показания; нуждается ли в переводчике", type: text, required: true, group: "Допрашиваемое лицо"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: testimony, label: "Показания потерпевшего (от первого лица)", type: textarea, required: true, group: "Показания"}
+      - {key: qa, label: "Вопросы и ответы", type: textarea, group: "Показания"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "допроса потерпевшего") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164, 187–190 УПК РФ допросил в качестве потерпевшего:</p>
+      {{ m.participant_card('victim') }}
+      <p>Язык, на котором желает давать показания: {{ v.language }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Потерпевшему разъяснены права и обязанности, предусмотренные ст. 42 УПК РФ, а также положения ст. 51 Конституции Российской Федерации.</p>
+      {{ m.sign("Потерпевший", pv('victim', 'short_name')) }}
+      <p>Потерпевший предупреждён об уголовной ответственности за отказ от дачи показаний по ст. 308 УК РФ и за дачу заведомо ложных показаний по ст. 307 УК РФ.</p>
+      {{ m.sign("Потерпевший", pv('victim', 'short_name')) }}
+      <p>По существу уголовного дела потерпевший показал следующее:</p>
+      <p>{{ v.testimony }}</p>
+      {% if has.qa %}<p class="pre">{{ v.qa }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>С моих слов записано верно.</p>
+      {{ m.sign("Потерпевший", pv('victim', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: interrogation_suspect
+    title: "Протокол допроса подозреваемого"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [допрос подозреваемого, подозреваемый]
+    legal_bases:
+      - {key: "upk:46", reason: "Подозреваемый, его права"}
+      - {key: "upk:49", reason: "Участие защитника"}
+      - {key: "upk:189", reason: "Общие правила проведения допроса"}
+      - {key: "upk:190", reason: "Протокол допроса"}
+      - {key: "konst:51", reason: "Право не свидетельствовать против себя"}
+    warnings:
+      - "Подозреваемый не предупреждается об ответственности по ст. 307, 308 УК РФ."
+      - "Проверьте наличие оснований обязательного участия защитника (ст. 51 УПК РФ)."
+    fields:
+      - use: protocol_core
+      - use: case_ref
+      - {key: suspect, label: "Подозреваемый", type: participant, participant_role: "suspect", required: true, group: "Допрашиваемое лицо"}
+      - {key: suspect_basis, label: "Основание признания лица подозреваемым", type: select, required: true, group: "Допрашиваемое лицо", options: ["в отношении лица возбуждено уголовное дело", "лицо задержано в соответствии со ст. 91 и 92 УПК РФ", "к лицу применена мера пресечения до предъявления обвинения", "лицо уведомлено о подозрении в совершении преступления в порядке ст. 223.1 УПК РФ"]}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender", group: "Допрашиваемое лицо"}
+      - {key: language, label: "Язык, на котором желает давать показания; нуждается ли в переводчике", type: text, required: true, group: "Допрашиваемое лицо"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: suspicion, label: "Существо подозрения, объявленное подозреваемому", type: textarea, required: true, group: "Показания"}
+      - {key: willing, label: "Позиция по даче показаний", type: select, required: true, options: ["желает дать показания", "от дачи показаний отказывается на основании ст. 51 Конституции РФ"], group: "Показания"}
+      - {key: testimony, label: "Показания подозреваемого (от первого лица)", type: textarea, required: true, condition: "willing == 'желает дать показания'", group: "Показания"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "допроса подозреваемого") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 46, 164, 189 и 190 УПК РФ допросил в качестве подозреваемого:</p>
+      {{ m.participant_card('suspect') }}
+      <p>Основание признания подозреваемым: {{ v.suspect_basis }}.</p>
+      {% if has.defender %}<p>С участием защитника {{ pv('defender', 'display_name') }} (ордер {{ pv('defender', 'warrant') }}).</p>{% endif %}
+      <p>Язык, на котором желает давать показания: {{ v.language }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Подозреваемому разъяснены права, предусмотренные ч. 4 ст. 46 УПК РФ, а также ст. 51 Конституции Российской Федерации. Подозреваемый предупреждён о том, что при согласии дать показания его показания могут быть использованы в качестве доказательств по уголовному делу, в том числе и при его последующем отказе от этих показаний.</p>
+      {{ m.sign("Подозреваемый", pv('suspect', 'short_name')) }}
+      <p>Подозреваемому объявлено, что он подозревается в совершении преступления, предусмотренного {{ v.qualification }}, а именно: {{ v.suspicion }}</p>
+      <p>Подозреваемый {{ v.willing }}.</p>
+      {% if raw.willing == 'желает дать показания' %}<p>По существу подозрения показал следующее:</p><p>{{ v.testimony }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>С моих слов записано верно.</p>
+      {{ m.sign("Подозреваемый", pv('suspect', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: interrogation_accused
+    title: "Протокол допроса обвиняемого"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [допрос обвиняемого, обвиняемый, предъявление обвинения]
+    legal_bases:
+      - {key: "upk:47", reason: "Обвиняемый, его права"}
+      - {key: "upk:173", reason: "Допрос обвиняемого"}
+      - {key: "upk:174", reason: "Порядок допроса обвиняемого"}
+      - {key: "upk:190", reason: "Протокол допроса"}
+      - {key: "konst:51", reason: "Право не свидетельствовать против себя"}
+    fields:
+      - use: protocol_core
+      - use: case_ref
+      - {key: accused, label: "Обвиняемый", type: participant, participant_role: "accused", required: true, group: "Допрашиваемое лицо"}
+      - {key: charge_date, label: "Дата предъявления обвинения", type: date, required: true, group: "Допрашиваемое лицо"}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender", group: "Допрашиваемое лицо"}
+      - {key: language, label: "Язык, на котором желает давать показания; нуждается ли в переводчике", type: text, required: true, group: "Допрашиваемое лицо"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: attitude, label: "Отношение к предъявленному обвинению", type: select, required: true, options: ["вину признаёт полностью", "вину признаёт частично", "вину не признаёт"], group: "Показания"}
+      - {key: willing, label: "Позиция по даче показаний", type: select, required: true, options: ["желает дать показания", "от дачи показаний отказывается на основании ст. 51 Конституции РФ"], group: "Показания"}
+      - {key: testimony, label: "Показания обвиняемого (от первого лица)", type: textarea, required: true, condition: "willing == 'желает дать показания'", group: "Показания"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "допроса обвиняемого") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 47, 173, 174, 189 и 190 УПК РФ допросил в качестве обвиняемого:</p>
+      {{ m.participant_card('accused') }}
+      <p>Обвинение предъявлено {{ v.charge_date }} по {{ v.qualification }}.</p>
+      {% if has.defender %}<p>С участием защитника {{ pv('defender', 'display_name') }} (ордер {{ pv('defender', 'warrant') }}).</p>{% endif %}
+      <p>Язык, на котором желает давать показания: {{ v.language }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Обвиняемому разъяснены права, предусмотренные ч. 4 ст. 47 УПК РФ, а также ст. 51 Конституции Российской Федерации. Обвиняемый предупреждён о том, что при согласии дать показания его показания могут быть использованы в качестве доказательств по уголовному делу, в том числе и при его последующем отказе от этих показаний.</p>
+      {{ m.sign("Обвиняемый", pv('accused', 'short_name')) }}
+      <p>Сущность предъявленного обвинения обвиняемому понятна. Обвиняемый {{ v.attitude }}, {{ v.willing }}.</p>
+      {% if raw.willing == 'желает дать показания' %}<p>По существу предъявленного обвинения показал следующее:</p><p>{{ v.testimony }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>С моих слов записано верно.</p>
+      {{ m.sign("Обвиняемый", pv('accused', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: confrontation
+    title: "Протокол очной ставки"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [очная ставка, противоречия в показаниях]
+    legal_bases:
+      - {key: "upk:192", reason: "Очная ставка при наличии существенных противоречий в показаниях ранее допрошенных лиц"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: person1, label: "Первый участник очной ставки", type: participant, participant_role: "witness|victim|suspect|accused", required: true, group: "Участники"}
+      - {key: person2, label: "Второй участник очной ставки", type: participant, participant_role: "witness|victim|suspect|accused", required: true, group: "Участники"}
+      - {key: contradictions, label: "Существенные противоречия в показаниях, устраняемые очной ставкой", type: textarea, required: true, group: "Содержание"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: acquaintance, label: "Ответы на вопрос, знают ли участники друг друга и в каких отношениях находятся", type: textarea, required: true, group: "Содержание"}
+      - {key: testimony1, label: "Показания первого участника", type: textarea, required: true, group: "Показания"}
+      - {key: testimony2, label: "Показания второго участника", type: textarea, required: true, group: "Показания"}
+      - {key: qa, label: "Вопросы и ответы", type: textarea, group: "Показания"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "очной ставки") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164 и 192 УПК РФ произвёл очную ставку между {{ pv('person1', 'display_name') }} ({{ pv('person1', 'role_label') }}) и {{ pv('person2', 'display_name') }} ({{ pv('person2', 'role_label') }}) в целях устранения существенных противоречий в их показаниях: {{ v.contradictions }}</p>
+      {{ m.protocol_participants_block() }}
+      <p>Участникам очной ставки разъяснены их права и обязанности; лица, допрашиваемые в качестве свидетеля или потерпевшего, предупреждены об уголовной ответственности по ст. 307 и 308 УК РФ.</p>
+      <p>На вопрос, знают ли они друг друга и в каких отношениях находятся между собой: {{ v.acquaintance }}</p>
+      <p>{{ pv('person1', 'short_name') }} показал(-а): {{ v.testimony1 }}</p>
+      <p>{{ pv('person2', 'short_name') }} показал(-а): {{ v.testimony2 }}</p>
+      {% if has.qa %}<p class="pre">{{ v.qa }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      {{ m.sign(pv('person1', 'role_label'), pv('person1', 'short_name')) }}
+      {{ m.sign(pv('person2', 'role_label'), pv('person2', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: identification
+    title: "Протокол предъявления для опознания"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [опознание, предъявление для опознания, опознающий]
+    legal_bases:
+      - {key: "upk:193", reason: "Предъявление для опознания"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    warnings:
+      - "Лицо предъявляется для опознания вместе с другими лицами, по возможности внешне сходными с ним; общее число лиц — не менее трёх (ч. 4 ст. 193 УПК РФ)."
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: identifier, label: "Опознающий", type: participant, participant_role: "witness|victim|suspect|accused", required: true, group: "Участники"}
+      - {key: object_type, label: "Объект опознания", type: select, required: true, options: ["лицо", "предмет", "труп", "лицо по фотографии"], group: "Объект"}
+      - {key: prior_interrogation, label: "Сведения о предварительном допросе опознающего об обстоятельствах и приметах (дата протокола)", type: text, required: true, group: "Объект", help: "ч. 2 ст. 193 УПК РФ"}
+      - {key: presented, label: "Предъявленные лица (предметы) с указанием порядкового номера и местоположения", type: list, required: true, group: "Объект"}
+      - {key: visual_isolation, label: "Опознание в условиях, исключающих визуальное наблюдение опознающего опознаваемым", type: bool, group: "Объект", help: "ч. 8 ст. 193 УПК РФ"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: result, label: "Результат опознания и приметы, по которым опознан объект (со слов опознающего)", type: textarea, required: true, group: "Результат"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "предъявления для опознания") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164 и 193 УПК РФ предъявил для опознания ({{ v.object_type }}) опознающему {{ m.participant_details('identifier') }}.</p>
+      <p>Опознающий предварительно допрошен об обстоятельствах, при которых он видел предъявленное для опознания лицо (предмет), о приметах и особенностях, по которым может его опознать: {{ v.prior_interrogation }}.</p>
+      {% if raw.visual_isolation %}<p>Опознание проводится в условиях, исключающих визуальное наблюдение опознающего опознаваемым (ч. 8 ст. 193 УПК РФ).</p>{% endif %}
+      {{ m.protocol_participants_block() }}
+      <p>Для опознания предъявлены:</p>
+      <p class="pre">{{ v.presented }}</p>
+      <p><b>Результат опознания:</b> {{ v.result }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign("Опознающий", pv('identifier', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: verification_on_site
+    title: "Протокол проверки показаний на месте"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [проверка показаний на месте]
+    legal_bases:
+      - {key: "upk:194", reason: "Проверка показаний на месте"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: person, label: "Лицо, показания которого проверяются", type: participant, participant_role: "witness|victim|suspect|accused", required: true, group: "Участники"}
+      - {key: purpose, label: "Цель проверки (какие показания и от какой даты проверяются)", type: textarea, required: true, group: "Содержание"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: course, label: "Ход проверки: маршрут, указанные лицом места, предметы, следы, продемонстрированные действия", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "проверки показаний на месте") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164 и 194 УПК РФ произвёл проверку показаний {{ pv('person', 'role_label') }} {{ pv('person', 'display_name') }} на месте в целях: {{ v.purpose }}</p>
+      {{ m.protocol_participants_block() }}
+      <p>Перед началом проверки лицу, показания которого проверяются, предложено указать место, где его показания будут проверяться. Постороннее вмешательство в проверку и наводящие вопросы не допускались.</p>
+      <p><b>Ход и результаты проверки:</b></p>
+      <p>{{ v.course }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: experiment
+    title: "Протокол следственного эксперимента"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [следственный эксперимент, воспроизведение действий]
+    legal_bases:
+      - {key: "upk:181", reason: "Следственный эксперимент"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    warnings:
+      - "Производство следственного эксперимента допускается, если не создаётся опасность для здоровья участвующих в нём лиц (ст. 181 УПК РФ)."
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: purpose, label: "Цель эксперимента (какие данные проверяются и уточняются)", type: textarea, required: true, group: "Содержание"}
+      - {key: conditions, label: "Условия эксперимента и воспроизводимая обстановка", type: textarea, required: true, group: "Содержание"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: course, label: "Ход эксперимента, число и последовательность опытов", type: textarea, required: true, group: "Содержание"}
+      - {key: result, label: "Результаты эксперимента", type: textarea, required: true, group: "Содержание"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "следственного эксперимента") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} в соответствии со ст. 164 и 181 УПК РФ произвёл следственный эксперимент в целях: {{ v.purpose }}</p>
+      {{ m.protocol_participants_block() }}
+      <p>Условия эксперимента: {{ v.conditions }}</p>
+      <p><b>Ход эксперимента:</b> {{ v.course }}</p>
+      <p><b>Результаты:</b> {{ v.result }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.investigator_sign() }}
+
+  - code: search_resolution
+    title: "Постановление о производстве обыска"
+    section: protocols
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [постановление об обыске, обыск]
+    legal_bases:
+      - {key: "upk:182", reason: "Основания и порядок производства обыска"}
+      - {key: "upk:165", reason: "Судебный порядок получения разрешения на обыск в жилище"}
+    warnings:
+      - "Обыск в жилище производится на основании судебного решения, за исключением случаев, не терпящих отлагательства (ч. 3 ст. 182, ч. 5 ст. 165 УПК РФ). Для жилища используйте ходатайство перед судом."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: place, label: "Место обыска (помещение, иное место, адрес)", type: text, required: true}
+      - {key: is_dwelling, label: "Место является жилищем", type: bool}
+      - {key: grounds, label: "Достаточные данные полагать, что в указанном месте могут находиться орудия, предметы, документы, ценности, имеющие значение для дела", type: textarea, required: true}
+      - {key: items_sought, label: "Разыскиваемые предметы и документы", type: list, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о производстве обыска") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.grounds }}</p>
+      <p>Руководствуясь ст. 182 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Произвести обыск по адресу: {{ v.place }} в целях отыскания и изъятия:</p>
+      <p class="pre">{{ v.items_sought }}</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление мне объявлено «___» ____________ 20__ г. ______________</p>
+
+  - code: search_protocol
+    title: "Протокол обыска"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    specializations: [cyber]
+    keywords: [обыск, протокол обыска, изъятие]
+    legal_bases:
+      - {key: "upk:182", reason: "Основания и порядок производства обыска"}
+      - {key: "upk:164.1", reason: "Особенности изъятия электронных носителей информации", mandatory: false}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+      - {key: "upk:170", reason: "Участие понятых"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: basis, label: "Основание обыска (постановление следователя или судебное решение, дата)", type: text, required: true, group: "Основание"}
+      - {key: present_person, label: "Лицо, в помещении которого производится обыск (либо совершеннолетний член семьи)", type: text, required: true, group: "Основание", help: "ч. 11 ст. 182 УПК РФ"}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: voluntary_offer, label: "Результат предложения добровольно выдать подлежащие изъятию предметы", type: textarea, required: true, group: "Ход обыска", help: "ч. 5 ст. 182 УПК РФ"}
+      - {key: course, label: "Ход обыска: где и при каких обстоятельствах обнаружены предметы", type: textarea, required: true, group: "Ход обыска", help: "ч. 13 ст. 182 УПК РФ"}
+      - {key: seized, label: "Изъятые предметы и документы (количество, мера, вес, индивидуальные признаки, упаковка); выданы добровольно или изъяты принудительно", type: list, group: "Изъятие"}
+      - {key: electronic_media, label: "Изъяты электронные носители информации", type: bool, group: "Изъятие"}
+      - {key: specialist, label: "Специалист, участвовавший при изъятии электронных носителей", type: text, required: true, condition: "electronic_media", group: "Изъятие", help: "ст. 164.1 УПК РФ"}
+      - {key: copy_request, label: "Ходатайство законного владельца о копировании информации и результат его разрешения", type: textarea, condition: "electronic_media", group: "Изъятие"}
+      - {key: copy_handed, label: "Копия протокола вручена (кому)", type: text, required: true, group: "Окончание", help: "ч. 15 ст. 182 УПК РФ"}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "обыска") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} на основании {{ v.basis }} в соответствии со ст. 164, 182 УПК РФ в присутствии {{ v.present_person }} произвёл обыск.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Перед началом обыска предъявлено основание его производства и предложено добровольно выдать подлежащие изъятию предметы, документы и ценности, которые могут иметь значение для уголовного дела. {{ v.voluntary_offer }}</p>
+      <p><b>Ход обыска:</b> {{ v.course }}</p>
+      {% if has.seized %}<p><b>Изъято:</b></p><p class="pre">{{ v.seized }}</p>{% else %}<p>В ходе обыска предметы и документы не изымались.</p>{% endif %}
+      {% if raw.electronic_media %}<p>Изъятие электронных носителей информации произведено с участием специалиста {{ v.specialist }} в соответствии со ст. 164.1 УПК РФ.{% if has.copy_request %} {{ v.copy_request }}{% endif %}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      <p>Копия протокола вручена: {{ v.copy_handed }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: personal_search_protocol
+    title: "Протокол личного обыска"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [личный обыск]
+    legal_bases:
+      - {key: "upk:184", reason: "Личный обыск"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    warnings:
+      - "Личный обыск производится лицом одного пола с обыскиваемым в присутствии понятых и специалистов того же пола, если они участвуют (ч. 3 ст. 184 УПК РФ)."
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: person, label: "Обыскиваемое лицо", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: basis, label: "Основание (постановление, задержание — ч. 2 ст. 184 УПК РФ)", type: text, required: true}
+      - {key: performer, label: "Лицо, производившее обыск (того же пола)", type: text, required: true}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: course, label: "Ход и результаты обыска", type: textarea, required: true}
+      - {key: seized, label: "Изъятые предметы и документы, упаковка", type: list}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "личного обыска") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} на основании {{ v.basis }} в соответствии со ст. 184 УПК РФ поручил {{ v.performer }} произвести личный обыск {{ m.participant_details('person') }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p><b>Ход и результаты обыска:</b> {{ v.course }}</p>
+      {% if has.seized %}<p><b>Изъято:</b></p><p class="pre">{{ v.seized }}</p>{% endif %}
+      {{ m.protocol_end_block() }}
+      {{ m.sign("Обыскиваемый", pv('person', 'short_name')) }}
+      {{ m.investigator_sign() }}
+
+  - code: seizure_resolution
+    title: "Постановление о производстве выемки"
+    section: protocols
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [выемка, постановление о выемке]
+    legal_bases:
+      - {key: "upk:183", reason: "Основания и порядок производства выемки"}
+      - {key: "upk:165", reason: "Судебный порядок для случаев, предусмотренных ч. 3 ст. 183 УПК РФ", mandatory: false}
+    warnings:
+      - "Выемка предметов и документов, содержащих охраняемую федеральным законом тайну, а также в жилище, производится в предусмотренных законом случаях на основании судебного решения (ч. 3 ст. 183 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: holder, label: "У кого производится выемка (лицо, организация, адрес)", type: text, required: true}
+      - {key: items, label: "Подлежащие изъятию предметы и документы (точно известные место и лицо)", type: list, required: true}
+      - {key: grounds, label: "Обоснование значения предметов для уголовного дела", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о производстве выемки") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.grounds }}</p>
+      <p>Руководствуясь ст. 183 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Произвести выемку у {{ v.holder }} следующих предметов и документов:</p>
+      <p class="pre">{{ v.items }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: seizure_protocol
+    title: "Протокол выемки"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [выемка, протокол выемки]
+    legal_bases:
+      - {key: "upk:183", reason: "Основания и порядок производства выемки"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: basis, label: "Основание (постановление о производстве выемки, судебное решение — дата)", type: text, required: true}
+      - {key: holder, label: "У кого производится выемка", type: text, required: true}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: voluntary, label: "Результат предложения добровольно выдать предметы", type: textarea, required: true}
+      - {key: seized, label: "Изъятые предметы и документы (индивидуальные признаки, упаковка)", type: list, required: true}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "выемки") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} на основании {{ v.basis }} в соответствии со ст. 164, 183 УПК РФ произвёл выемку у {{ v.holder }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>Перед началом выемки предложено добровольно выдать предметы и документы, подлежащие изъятию. {{ v.voluntary }}</p>
+      <p><b>Изъято:</b></p>
+      <p class="pre">{{ v.seized }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.investigator_sign() }}
+
+  - code: samples_resolution
+    title: "Постановление о получении образцов для сравнительного исследования"
+    section: protocols
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [образцы, сравнительное исследование, получение образцов]
+    legal_bases:
+      - {key: "upk:202", reason: "Получение образцов для сравнительного исследования"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: person, label: "Лицо, у которого получаются образцы", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: samples, label: "Виды образцов (почерк, отпечатки, буккальный эпителий и т. п.)", type: list, required: true}
+      - {key: grounds, label: "Необходимость получения образцов", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о получении образцов для сравнительного исследования") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.grounds }}</p>
+      <p>Руководствуясь ст. 202 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Получить у {{ m.participant_details('person') }} образцы для сравнительного исследования:</p>
+      <p class="pre">{{ v.samples }}</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление мне объявлено «___» ____________ 20__ г.</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+
+  - code: samples_protocol
+    title: "Протокол получения образцов для сравнительного исследования"
+    section: protocols
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [образцы, протокол получения образцов]
+    legal_bases:
+      - {key: "upk:202", reason: "Получение образцов для сравнительного исследования"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: person, label: "Лицо, у которого получены образцы", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: resolution_date, label: "Дата постановления о получении образцов", type: date, required: true}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: procedure, label: "Порядок получения и упаковка образцов", type: textarea, required: true}
+      - {key: samples, label: "Полученные образцы", type: list, required: true}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "получения образцов для сравнительного исследования") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} на основании постановления от {{ v.resolution_date }} в соответствии со ст. 202 УПК РФ получил образцы для сравнительного исследования у {{ m.participant_details('person') }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p>{{ v.procedure }}</p>
+      <p><b>Получены образцы:</b></p>
+      <p class="pre">{{ v.samples }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      {{ m.investigator_sign() }}

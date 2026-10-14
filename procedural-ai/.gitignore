@@ -1,0 +1,18 @@
+# Секреты и данные
+deploy/.env
+deploy/_ca.crt
+deploy/backups/*
+!deploy/backups/.gitkeep
+backend/data/
+*.sqlite3
+*.key
+# Сборка и зависимости
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+deploy/_fonts/

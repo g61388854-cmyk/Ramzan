@@ -1,0 +1,442 @@
+# Раздел 4.5. Меры процессуального принуждения
+documents:
+  - code: detention_protocol
+    title: "Протокол задержания подозреваемого"
+    section: coercion
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [задержание, протокол задержания, подозреваемый, ст. 91]
+    legal_bases:
+      - {key: "upk:91", reason: "Основания задержания подозреваемого"}
+      - {key: "upk:92", reason: "Порядок задержания; протокол составляется в срок не более 3 часов после доставления"}
+      - {key: "upk:46", reason: "Разъяснение прав подозреваемого"}
+      - {key: "upk:184", reason: "Личный обыск при задержании", mandatory: false}
+    warnings:
+      - "О задержании необходимо письменно сообщить прокурору в течение 12 часов с момента задержания (ч. 3 ст. 92 УПК РФ) и уведомить близких родственников (ст. 96 УПК РФ)."
+      - "Задержание допускается по подозрению в совершении преступления, за которое может быть назначено наказание в виде лишения свободы (ч. 1 ст. 91 УПК РФ)."
+    fields:
+      - {key: doc_date, label: "Дата составления протокола", type: date, required: true, binding: today, group: "Реквизиты"}
+      - {key: city, label: "Место составления", type: text, required: true, binding: case.city, group: "Реквизиты"}
+      - {key: protocol_time, label: "Время составления протокола", type: time, required: true, group: "Реквизиты"}
+      - {key: investigator_position, label: "Должность следователя", type: text, required: true, binding: case.investigator_position, group: "Реквизиты"}
+      - {key: investigator_name, label: "Фамилия и инициалы следователя", type: text, required: true, binding: case.investigator_name, group: "Реквизиты"}
+      - use: case_ref
+      - {key: suspect, label: "Задержанный", type: participant, participant_role: "suspect", required: true, group: "Задержание"}
+      - {key: actual_detention, label: "Дата и время фактического задержания", type: datetime, required: true, group: "Задержание", help: "Момент фактического задержания (п. 15 ст. 5 УПК РФ) — от него исчисляется срок задержания"}
+      - {key: detention_place, label: "Место задержания", type: text, required: true, group: "Задержание"}
+      - {key: ground, label: "Основание задержания", type: select, required: true, group: "Задержание", options: ["п. 1 ч. 1 ст. 91 УПК РФ — лицо застигнуто при совершении преступления или непосредственно после его совершения", "п. 2 ч. 1 ст. 91 УПК РФ — потерпевшие или очевидцы указали на данное лицо как на совершившее преступление", "п. 3 ч. 1 ст. 91 УПК РФ — на лице или его одежде, при нём или в его жилище обнаружены явные следы преступления", "ч. 2 ст. 91 УПК РФ — иные данные, дающие основание подозревать лицо в совершении преступления"]}
+      - {key: part2_condition, label: "Условие задержания по ч. 2 ст. 91 УПК РФ", type: select, required: true, condition: "ground == 'ч. 2 ст. 91 УПК РФ — иные данные, дающие основание подозревать лицо в совершении преступления'", group: "Задержание", options: ["лицо пыталось скрыться", "лицо не имеет постоянного места жительства", "не установлена личность лица", "следователем направлено в суд ходатайство об избрании в отношении лица меры пресечения в виде заключения под стражу"]}
+      - {key: motives, label: "Мотивы задержания", type: textarea, required: true, group: "Задержание"}
+      - {key: defender, label: "Защитник", type: participant, participant_role: "defender", group: "Задержание"}
+      - {key: personal_search, label: "Результаты личного обыска (изъятые предметы и документы)", type: textarea, group: "Личный обыск"}
+      - {key: suspect_statement, label: "Заявления подозреваемого по поводу задержания", type: textarea, group: "Окончание"}
+    body: |
+      {{ m.title("ПРОТОКОЛ", "задержания подозреваемого") }}
+      {{ m.place_date() }}
+      <p class="small">Протокол составлен в {{ v.protocol_time }}.</p>
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }}, возбуждённому по признакам преступления, предусмотренного {{ v.qualification }}, в соответствии со ст. 91 и 92 УПК РФ составил настоящий протокол о том, что {{ v.actual_detention }} в {{ v.detention_place }} фактически задержан(-а):</p>
+      {{ m.participant_card('suspect') }}
+      <p>Основание задержания: {{ v.ground }}{% if has.part2_condition %}, при этом {{ v.part2_condition }}{% endif %}.</p>
+      <p>Мотивы задержания: {{ v.motives }}</p>
+      {% if has.defender %}<p>Протокол составлен с участием защитника {{ pv('defender', 'display_name') }}.</p>{% endif %}
+      <p>Подозреваемому разъяснены права, предусмотренные ст. 46 УПК РФ, а также положения ст. 51 Конституции Российской Федерации.</p>
+      {{ m.sign("Подозреваемый", pv('suspect', 'short_name')) }}
+      <p><b>Результаты личного обыска:</b> {% if has.personal_search %}{{ v.personal_search }}{% else %}личный обыск не производился (предметы не изымались).{% endif %}</p>
+      <p>Заявления подозреваемого: {% if has.suspect_statement %}{{ v.suspect_statement }}{% else %}не поступили.{% endif %}</p>
+      <p>Протокол прочитан, замечаний нет.</p>
+      {{ m.sign("Подозреваемый", pv('suspect', 'short_name')) }}
+      {% if has.defender %}{{ m.sign("Защитник", pv('defender', 'short_name')) }}{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: detention_prosecutor_notice
+    title: "Сообщение прокурору о задержании подозреваемого"
+    section: coercion
+    kind: notice
+    author: "Следователь"
+    addressee: "Прокурор"
+    stages: [investigation]
+    keywords: [сообщение прокурору, задержание, 12 часов]
+    legal_bases:
+      - {key: "upk:92", reason: "Письменное сообщение прокурору в течение 12 часов с момента задержания (ч. 3 ст. 92 УПК РФ)"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_ref
+      - {key: suspect, label: "Задержанный", type: participant, participant_role: "suspect", required: true}
+      - {key: actual_detention, label: "Дата и время фактического задержания", type: datetime, required: true}
+      - {key: ground, label: "Основание задержания (пункт, часть ст. 91 УПК РФ)", type: text, required: true}
+      - {key: custody_place, label: "Место содержания задержанного", type: text, required: true}
+    body: |
+      {{ m.letter_head() }}
+      {{ m.title("СООБЩЕНИЕ", "о задержании подозреваемого") }}
+      <p>В соответствии с ч. 3 ст. 92 УПК РФ сообщаю, что {{ v.actual_detention }} по уголовному делу № {{ v.case_number }}, возбуждённому по признакам преступления, предусмотренного {{ v.qualification }}, в порядке ст. 91 и 92 УПК РФ задержан(-а) {{ m.participant_details('suspect') }}.</p>
+      <p>Основание задержания: {{ v.ground }}. Задержанный содержится: {{ v.custody_place }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: detention_relatives_notice
+    title: "Уведомление родственников о задержании подозреваемого"
+    section: coercion
+    kind: notice
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [уведомление родственников, задержание, ст. 96]
+    legal_bases:
+      - {key: "upk:96", reason: "Уведомление о задержании подозреваемого не позднее 12 часов с момента задержания"}
+    warnings:
+      - "При задержании военнослужащего уведомляется командование воинской части, при задержании иностранного гражданина — посольство (консульство) соответствующего государства (ст. 96 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: suspect, label: "Задержанный", type: participant, participant_role: "suspect", required: true}
+      - {key: actual_detention, label: "Дата и время задержания", type: datetime, required: true}
+      - {key: relative, label: "Уведомляемый родственник (ФИО, степень родства)", type: text, required: true}
+      - {key: notice_method, label: "Способ уведомления (телефон, телеграмма, лично) и время", type: text, required: true}
+      - {key: custody_place, label: "Место содержания задержанного", type: text, required: true}
+    body: |
+      {{ m.title("УВЕДОМЛЕНИЕ", "о задержании подозреваемого") }}
+      {{ m.place_date() }}
+      <p>Уважаемый(-ая) {{ v.relative }}!</p>
+      <p>Уведомляю Вас о том, что {{ v.actual_detention }} по уголовному делу № {{ v.case_number }} в порядке ст. 91 и 92 УПК РФ задержан(-а) {{ pv('suspect', 'display_name') }}, {{ pv('suspect', 'birth_date') }} года рождения. Место содержания: {{ v.custody_place }}.</p>
+      <p>Уведомление произведено: {{ v.notice_method }} (ст. 96 УПК РФ).</p>
+      {{ m.investigator_sign() }}
+
+  - code: custody_petition
+    title: "Постановление о возбуждении перед судом ходатайства об избрании меры пресечения в виде заключения под стражу"
+    section: coercion
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Районный (гарнизонный военный) суд"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [заключение под стражу, мера пресечения, арест, ходатайство в суд]
+    legal_bases:
+      - {key: "upk:97", reason: "Основания для избрания меры пресечения"}
+      - {key: "upk:99", reason: "Обстоятельства, учитываемые при избрании меры пресечения"}
+      - {key: "upk:108", reason: "Заключение под стражу; возбуждение ходатайства с согласия руководителя следственного органа (ч. 3 ст. 108 УПК РФ)"}
+      - {key: "upk:29", reason: "Полномочия суда (ч. 2 ст. 29 УПК РФ)"}
+    warnings:
+      - "В отношении задержанного подозреваемого постановление и материалы представляются судье не позднее чем за 8 часов до истечения срока задержания (ч. 3 ст. 108 УПК РФ)."
+      - "Необходимо обосновать невозможность избрания иной, более мягкой меры пресечения (ч. 3 ст. 108 УПК РФ)."
+    value_warnings:
+      status:
+        "подозреваемого": "Мера пресечения в отношении подозреваемого избирается в порядке ст. 100 УПК РФ; обвинение должно быть предъявлено не позднее 10 суток с момента применения меры пресечения (с исключениями, установленными законом)."
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: person, label: "Лицо, в отношении которого возбуждается ходатайство", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: status, label: "Процессуальный статус лица", type: select, required: true, options: ["подозреваемого", "обвиняемого"]}
+      - {key: circumstances, label: "Обстоятельства, в совершении которых подозревается (обвиняется) лицо", type: textarea, required: true, narrative: true}
+      - {key: procedural_history, label: "Процессуальная история (задержание, предъявление обвинения — даты)", type: textarea, required: true}
+      - {key: grounds_97, label: "Основания по ст. 97 УПК РФ и подтверждающие их фактические данные", type: textarea, required: true, help: "Скроется от следствия; может продолжать заниматься преступной деятельностью; может угрожать участникам, уничтожить доказательства или иным путём воспрепятствовать производству. Каждое основание подтверждается материалами дела"}
+      - {key: circumstances_99, label: "Обстоятельства, учитываемые по ст. 99 УПК РФ (тяжесть, личность, возраст, здоровье, семейное положение, род занятий)", type: textarea, required: true}
+      - {key: milder_impossible, label: "Обоснование невозможности избрания иной меры пресечения", type: textarea, required: true}
+      - {key: term, label: "Испрашиваемый срок содержания под стражей", type: text, required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства об избрании меры пресечения в виде заключения под стражу") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>{{ v.procedural_history }}</p>
+      <p>{{ pv('person', 'display_name') }} подозревается (обвиняется) в совершении преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.grounds_97 }}</p>
+      <p>При этом учитываются следующие обстоятельства: {{ v.circumstances_99 }}</p>
+      <p>{{ v.milder_impossible }}</p>
+      <p>На основании изложенного, руководствуясь ст. 97, 99 и 108 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство об избрании в отношении {{ v.status }} {{ m.participant_details('person') }} меры пресечения в виде заключения под стражу {{ v.term }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: house_arrest_petition
+    title: "Постановление о возбуждении перед судом ходатайства об избрании меры пресечения в виде домашнего ареста"
+    section: coercion
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Районный (гарнизонный военный) суд"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [домашний арест, мера пресечения, ходатайство в суд]
+    legal_bases:
+      - {key: "upk:97", reason: "Основания для избрания меры пресечения"}
+      - {key: "upk:99", reason: "Обстоятельства, учитываемые при избрании меры пресечения"}
+      - {key: "upk:107", reason: "Домашний арест"}
+      - {key: "upk:108", reason: "Порядок избрания (применяется к домашнему аресту в силу ст. 107 УПК РФ)"}
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: person, label: "Лицо, в отношении которого возбуждается ходатайство", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: status, label: "Процессуальный статус лица", type: select, required: true, options: ["подозреваемого", "обвиняемого"]}
+      - {key: circumstances, label: "Обстоятельства, в совершении которых подозревается (обвиняется) лицо", type: textarea, required: true, narrative: true}
+      - {key: grounds_97, label: "Основания по ст. 97 УПК РФ и подтверждающие их данные", type: textarea, required: true}
+      - {key: circumstances_99, label: "Обстоятельства, учитываемые по ст. 99 УПК РФ", type: textarea, required: true}
+      - {key: residence, label: "Жилое помещение, в котором лицо будет находиться под домашним арестом, и основания проживания в нём", type: text, required: true}
+      - {key: restrictions, label: "Испрашиваемые запреты и ограничения", type: list, required: true}
+      - {key: supervising_body, label: "Контролирующий орган", type: text, required: true}
+      - {key: term, label: "Испрашиваемый срок", type: text, required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства об избрании меры пресечения в виде домашнего ареста") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>{{ v.grounds_97 }}</p>
+      <p>При этом учитываются следующие обстоятельства: {{ v.circumstances_99 }}</p>
+      <p>На основании изложенного, руководствуясь ст. 97, 99, 107 и 108 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство об избрании в отношении {{ v.status }} {{ m.participant_details('person') }} меры пресечения в виде домашнего ареста {{ v.term }} с нахождением в жилом помещении по адресу: {{ v.residence }}, с установлением следующих запретов и ограничений:</p>
+      <p class="pre">{{ v.restrictions }}</p>
+      <p>Осуществление контроля возложить на {{ v.supervising_body }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: custody_extension_petition
+    title: "Постановление о возбуждении перед судом ходатайства о продлении срока содержания под стражей"
+    section: coercion
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Районный (гарнизонный военный) суд"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [продление срока содержания под стражей, продление ареста]
+    legal_bases:
+      - {key: "upk:109", reason: "Сроки содержания под стражей и порядок их продления"}
+      - {key: "upk:108", reason: "Заключение под стражу"}
+    warnings:
+      - "Ходатайство должно быть представлено в суд не позднее чем за 7 суток до истечения срока содержания под стражей (ч. 8 ст. 109 УПК РФ). Проверьте расчёт в модуле сроков."
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: person, label: "Лицо, содержащееся под стражей", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: custody_history, label: "Когда и каким судом избрана мера пресечения, сведения о продлениях", type: textarea, required: true}
+      - {key: current_expiry, label: "Дата истечения срока содержания под стражей", type: date, required: true}
+      - {key: requested_until, label: "Испрашиваемый срок продления (всего и дата окончания)", type: text, required: true}
+      - {key: remaining_actions, label: "Следственные и процессуальные действия, которые необходимо выполнить", type: textarea, required: true}
+      - {key: grounds_persist, label: "Обоснование сохранения оснований для содержания под стражей", type: textarea, required: true}
+      - {key: why_not_completed, label: "Причины, по которым расследование не завершено", type: textarea, required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства о продлении срока содержания под стражей") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.custody_history }}</p>
+      <p>Срок содержания {{ pv('person', 'display_name') }} под стражей истекает {{ v.current_expiry }}, однако окончить предварительное следствие к указанному сроку не представляется возможным, поскольку необходимо: {{ v.remaining_actions }}</p>
+      <p>{{ v.why_not_completed }}</p>
+      <p>{{ v.grounds_persist }}</p>
+      <p>На основании изложенного, руководствуясь ст. 108 и 109 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство о продлении срока содержания под стражей {{ m.participant_details('person') }} {{ v.requested_until }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: recognizance
+    title: "Постановление об избрании меры пресечения в виде подписки о невыезде и надлежащем поведении"
+    section: coercion
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [подписка о невыезде, мера пресечения]
+    legal_bases:
+      - {key: "upk:97", reason: "Основания для избрания меры пресечения"}
+      - {key: "upk:99", reason: "Обстоятельства, учитываемые при избрании меры пресечения"}
+      - {key: "upk:101", reason: "Постановление об избрании меры пресечения; вручение копии и разъяснение порядка обжалования"}
+      - {key: "upk:102", reason: "Подписка о невыезде и надлежащем поведении"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: person, label: "Подозреваемый (обвиняемый)", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: circumstances, label: "Обстоятельства дела", type: textarea, required: true, narrative: true}
+      - {key: grounds, label: "Основания избрания меры пресечения (ст. 97, 99 УПК РФ)", type: textarea, required: true}
+      - {key: residence, label: "Место жительства (пребывания), которое лицо обязуется не покидать", type: text, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "об избрании меры пресечения в виде подписки о невыезде и надлежащем поведении") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>{{ v.grounds }}</p>
+      <p>Руководствуясь ст. 97, 99, 101 и 102 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Избрать в отношении {{ m.participant_details('person') }}, подозреваемого (обвиняемого) в совершении преступления, предусмотренного {{ v.qualification }}, меру пресечения в виде подписки о невыезде и надлежащем поведении.</p>
+      <p>2. Копию постановления вручить лицу, в отношении которого оно вынесено, и его защитнику, разъяснив порядок обжалования.</p>
+      {{ m.investigator_sign() }}
+      <h2 class="doc-title">ПОДПИСКА о невыезде и надлежащем поведении</h2>
+      <p>Я, {{ pv('person', 'display_name') }}, даю настоящую подписку в том, что обязуюсь: не покидать постоянное или временное место жительства ({{ v.residence }}) без разрешения следователя или суда; в назначенный срок являться по вызовам следователя и в суд; иным путём не препятствовать производству по уголовному делу (ст. 102 УПК РФ). Мне разъяснено, что при нарушении подписки ко мне может быть применена более строгая мера пресечения.</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+
+  - code: measure_change
+    title: "Постановление об отмене (изменении) меры пресечения"
+    section: coercion
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation, suspended, completed]
+    keywords: [отмена меры пресечения, изменение меры пресечения]
+    legal_bases:
+      - {key: "upk:110", reason: "Отмена или изменение меры пресечения"}
+    warnings:
+      - "Проверьте порядок отмены (изменения) меры пресечения, избранной судом, и необходимость согласия руководителя следственного органа (ст. 110 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: person, label: "Подозреваемый (обвиняемый)", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: current_measure, label: "Действующая мера пресечения (когда и кем избрана)", type: text, required: true}
+      - {key: action, label: "Решение", type: select, required: true, options: ["отменить", "изменить на более мягкую", "изменить на более строгую"]}
+      - {key: new_measure, label: "Новая мера пресечения", type: text, required: true, condition: "action != 'отменить'"}
+      - {key: reasons, label: "Обоснование (отпадение необходимости, изменение оснований)", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "об отмене (изменении) меры пресечения") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>В отношении {{ pv('person', 'display_name') }} избрана мера пресечения: {{ v.current_measure }}.</p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 110 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Меру пресечения в отношении {{ m.participant_details('person') }} {{ v.action }}{% if has.new_measure %}: {{ v.new_measure }}{% endif %}.</p>
+      <p>2. Копию постановления направить прокурору, вручить лицу, в отношении которого оно вынесено, и его защитнику.</p>
+      {{ m.investigator_sign() }}
+
+  - code: appearance_obligation
+    title: "Обязательство о явке"
+    section: coercion
+    kind: form
+    author: "Участник (отбирается следователем)"
+    stages: [investigation]
+    keywords: [обязательство о явке]
+    legal_bases:
+      - {key: "upk:112", reason: "Обязательство о явке"}
+      - {key: "upk:111", reason: "Основания применения иных мер процессуального принуждения"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: person, label: "Лицо, дающее обязательство", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+    body: |
+      {{ m.title("ОБЯЗАТЕЛЬСТВО", "о явке") }}
+      {{ m.place_date() }}
+      <p>Я, {{ m.participant_details('person') }}, участвующий(-ая) в уголовном деле № {{ v.case_number }} в качестве {{ pv('person', 'role_label') }}, обязуюсь своевременно являться по вызовам следователя и в суд, а в случае перемены места жительства незамедлительно сообщать об этом (ст. 112 УПК РФ). Последствия неисполнения обязательства, предусмотренные УПК РФ, мне разъяснены.</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+      <p>Обязательство принял:</p>
+      {{ m.investigator_sign() }}
+
+  - code: compulsory_appearance
+    title: "Постановление о приводе"
+    section: coercion
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [привод, неявка по вызову]
+    legal_bases:
+      - {key: "upk:113", reason: "Привод"}
+    warnings:
+      - "Не подлежат приводу несовершеннолетние в возрасте до 14 лет, беременные женщины и больные, которые по состоянию здоровья не могут оставлять место своего пребывания; привод не производится в ночное время, за исключением случаев, не терпящих отлагательства (ст. 113 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: person, label: "Лицо, подвергаемое приводу", type: participant, participant_role: "suspect|accused|victim|witness", required: true}
+      - {key: missed_summons, label: "Сведения о вызовах и неявке без уважительных причин", type: textarea, required: true}
+      - {key: appear_at, label: "Дата и время, к которым лицо должно быть доставлено", type: datetime, required: true}
+      - {key: executor, label: "Орган, которому поручается исполнение", type: text, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о приводе") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.missed_summons }}</p>
+      <p>Руководствуясь ст. 113 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Подвергнуть приводу {{ m.participant_details('person') }} к следователю {{ v.appear_at }}.</p>
+      <p>2. Исполнение постановления поручить {{ v.executor }}.</p>
+      {{ m.investigator_sign() }}
+      <p>Постановление мне объявлено «___» ____________ 20__ г. в ___ ч ___ мин.</p>
+      {{ m.sign(pv('person', 'role_label'), pv('person', 'short_name')) }}
+
+  - code: suspension_from_office_petition
+    title: "Постановление о возбуждении перед судом ходатайства о временном отстранении от должности"
+    section: coercion
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Суд по месту производства предварительного расследования"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [отстранение от должности]
+    legal_bases:
+      - {key: "upk:114", reason: "Временное отстранение от должности"}
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: person, label: "Подозреваемый (обвиняемый)", type: participant, participant_role: "suspect|accused", required: true}
+      - {key: position_held, label: "Занимаемая должность и место работы", type: text, required: true}
+      - {key: reasons, label: "Обоснование необходимости отстранения", type: textarea, required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства о временном отстранении от должности") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ pv('person', 'display_name') }}, занимающий(-ая) должность {{ v.position_held }}, подозревается (обвиняется) в совершении преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 114 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство о временном отстранении {{ m.participant_details('person') }} от должности {{ v.position_held }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: property_arrest_petition
+    title: "Постановление о возбуждении перед судом ходатайства о наложении ареста на имущество"
+    section: coercion
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Суд по месту производства предварительного расследования"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [арест имущества, наложение ареста, гражданский иск, конфискация]
+    legal_bases:
+      - {key: "upk:115", reason: "Наложение ареста на имущество"}
+      - {key: "upk:165", reason: "Судебный порядок получения разрешения"}
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: owner, label: "Собственник (владелец) имущества", type: participant, participant_role: "suspect|accused|civil_defendant|other", required: true}
+      - {key: purpose, label: "Цель наложения ареста", type: select, required: true, options: ["обеспечение исполнения приговора в части гражданского иска", "обеспечение взыскания штрафа", "обеспечение других имущественных взысканий", "обеспечение возможной конфискации имущества"]}
+      - {key: property, label: "Имущество (индивидуальные признаки, стоимость, место нахождения)", type: list, required: true}
+      - {key: grounds, label: "Обоснование (достаточные основания полагать, что имущество получено преступным путём либо иные основания ст. 115 УПК РФ)", type: textarea, required: true}
+      - {key: restrictions, label: "Испрашиваемые ограничения (запрет распоряжения, пользования)", type: text, required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства о наложении ареста на имущество") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.grounds }}</p>
+      <p>В целях: {{ v.purpose }}, руководствуясь ст. 115 и 165 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство о наложении ареста на имущество, принадлежащее {{ m.participant_details('owner') }}:</p>
+      <p class="pre">{{ v.property }}</p>
+      <p>с установлением ограничений: {{ v.restrictions }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}

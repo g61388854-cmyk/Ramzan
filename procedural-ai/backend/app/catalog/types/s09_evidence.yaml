@@ -1,0 +1,165 @@
+# Раздел 4.9. Вещественные доказательства и имущество
+documents:
+  - code: material_evidence
+    title: "Постановление о признании и приобщении к уголовному делу вещественных доказательств"
+    section: evidence
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [вещественные доказательства, признать и приобщить, хранение]
+    legal_bases:
+      - {key: "upk:81", reason: "Вещественные доказательства; признание и приобщение постановлением (ч. 2 ст. 81 УПК РФ)"}
+      - {key: "upk:82", reason: "Хранение вещественных доказательств"}
+    fields:
+      - use: header
+      - use: case_ref
+      - {key: origin, label: "Обстоятельства изъятия и осмотра предметов (протоколы, даты)", type: textarea, required: true}
+      - {key: items, label: "Предметы, признаваемые вещественными доказательствами (индивидуальные признаки)", type: list, required: true}
+      - {key: relevance, label: "Значение предметов для уголовного дела (признаки, предусмотренные ч. 1 ст. 81 УПК РФ)", type: textarea, required: true}
+      - {key: storage, label: "Порядок хранения", type: select, required: true, options: ["хранить при уголовном деле", "передать на хранение в камеру хранения вещественных доказательств", "возвратить законному владельцу под сохранную расписку", "передать на ответственное хранение"]}
+      - {key: storage_details, label: "Место (лицо) хранения", type: text, required: true, condition: "storage != 'хранить при уголовном деле'"}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о признании и приобщении к уголовному делу вещественных доказательств") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.origin }}</p>
+      <p>{{ v.relevance }}</p>
+      <p>Руководствуясь ст. 81 и 82 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Признать вещественными доказательствами и приобщить к уголовному делу № {{ v.case_number }}:</p>
+      <p class="pre">{{ v.items }}</p>
+      <p>2. Вещественные доказательства {{ v.storage }}{% if has.storage_details %}: {{ v.storage_details }}{% endif %}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: evidence_return
+    title: "Постановление о возвращении вещественных доказательств законному владельцу"
+    section: evidence
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation, completed, terminated]
+    keywords: [возврат вещественных доказательств, законный владелец, сохранная расписка]
+    legal_bases:
+      - {key: "upk:81", reason: "Вещественные доказательства"}
+      - {key: "upk:82", reason: "Возвращение вещественных доказательств законному владельцу, если это возможно без ущерба для доказывания"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: owner, label: "Законный владелец", type: participant, participant_role: "victim|witness|other|civil_plaintiff", required: true}
+      - {key: items, label: "Возвращаемые предметы", type: list, required: true}
+      - {key: ownership_proof, label: "Документы, подтверждающие право владения", type: text, required: true}
+      - {key: no_harm, label: "Обоснование возможности возврата без ущерба для доказывания", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возвращении вещественных доказательств") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>Принадлежность предметов {{ pv('owner', 'display_name') }} подтверждается: {{ v.ownership_proof }}. {{ v.no_harm }}</p>
+      <p>Руководствуясь ст. 81 и 82 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возвратить законному владельцу {{ m.participant_details('owner') }} под сохранную расписку следующие вещественные доказательства:</p>
+      <p class="pre">{{ v.items }}</p>
+      {{ m.investigator_sign() }}
+      <h2 class="doc-title">СОХРАННАЯ РАСПИСКА</h2>
+      <p>Я, {{ pv('owner', 'display_name') }}, получил(-а) указанные предметы, обязуюсь хранить их до принятия окончательного решения по уголовному делу, не отчуждать и предъявить по требованию следователя или суда.</p>
+      {{ m.sign("Владелец", pv('owner', 'short_name')) }}
+
+  - code: documents_admission
+    title: "Постановление о приобщении к уголовному делу документов"
+    section: evidence
+    kind: resolution
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [приобщение документов, иные документы, ст. 84, результаты исследования]
+    legal_bases:
+      - {key: "upk:84", reason: "Иные документы"}
+      - {key: "upk:86", reason: "Собирание доказательств"}
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: documents, label: "Приобщаемые документы (наименование, дата, источник поступления, количество листов)", type: list, required: true}
+      - {key: relevance, label: "Значение документов для установления обстоятельств, указанных в ст. 73 УПК РФ", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о приобщении к уголовному делу документов") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.relevance }}</p>
+      <p>Руководствуясь ст. 84 и 86 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Приобщить к материалам уголовного дела № {{ v.case_number }}:</p>
+      <p class="pre">{{ v.documents }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: items_inventory
+    title: "Опись изъятых предметов и документов"
+    section: evidence
+    kind: inventory
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [опись предметов, изъятые предметы, упаковка, маркировка]
+    legal_bases: []
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: action, label: "Следственное действие, в ходе которого изъяты предметы (дата протокола)", type: text, required: true}
+      - {key: items, label: "Предметы: наименование, количество, индивидуальные признаки, упаковка, маркировка", type: list, required: true}
+    body: |
+      {{ m.title("ОПИСЬ", "изъятых предметов и документов") }}
+      {{ m.place_date() }}
+      <p>Уголовное дело № {{ v.case_number }}. Изъяты в ходе: {{ v.action }}.</p>
+      <p class="pre">{{ v.items }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: evidence_storage_transfer
+    title: "Сопроводительное письмо о передаче вещественных доказательств на хранение"
+    section: evidence
+    kind: letter
+    author: "Следователь"
+    stages: [investigation, completed]
+    keywords: [передача на хранение, камера хранения, вещественные доказательства]
+    legal_bases:
+      - {key: "upk:82", reason: "Хранение вещественных доказательств"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_number_only
+      - {key: resolution, label: "Постановление о признании вещественными доказательствами (дата)", type: text, required: true}
+      - {key: items, label: "Передаваемые предметы (упаковка, печати)", type: list, required: true}
+    body: |
+      {{ m.letter_head() }}
+      <p>На основании постановления {{ v.resolution }} по уголовному делу № {{ v.case_number }} направляю для хранения вещественные доказательства:</p>
+      <p class="pre">{{ v.items }}</p>
+      <p>Прошу принять на хранение и выдать квитанцию (расписку) о приёме.</p>
+      {{ m.investigator_sign() }}
+
+  - code: property_arrest_protocol
+    title: "Протокол наложения ареста на имущество"
+    section: evidence
+    kind: protocol
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [арест имущества, протокол ареста]
+    legal_bases:
+      - {key: "upk:115", reason: "Наложение ареста на имущество; составление протокола"}
+      - {key: "upk:166", reason: "Требования к протоколу"}
+    fields:
+      - use: protocol_core
+      - use: case_number_only
+      - {key: court_decision, label: "Судебное решение о разрешении наложения ареста (суд, дата)", type: text, required: true}
+      - {key: owner, label: "Собственник (владелец) имущества", type: participant, participant_role: "suspect|accused|civil_defendant|other", required: true}
+      - use: protocol_participants
+      - use: protocol_end
+      - {key: property, label: "Имущество, на которое наложен арест (индивидуальные признаки, стоимость)", type: list, required: true}
+      - {key: restrictions, label: "Установленные ограничения и лицо, которому имущество передано на хранение", type: textarea, required: true}
+    body: |
+      {{ m.protocol_head("ПРОТОКОЛ", "наложения ареста на имущество") }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }} по уголовному делу № {{ v.case_number }} на основании {{ v.court_decision }} в соответствии со ст. 115 УПК РФ наложил арест на имущество, принадлежащее {{ m.participant_details('owner') }}.</p>
+      {{ m.protocol_participants_block() }}
+      <p><b>Арест наложен на:</b></p>
+      <p class="pre">{{ v.property }}</p>
+      <p>{{ v.restrictions }}</p>
+      {{ m.protocol_end_block() }}
+      {{ m.sign("Владелец", pv('owner', 'short_name')) }}
+      {{ m.investigator_sign() }}

@@ -1,0 +1,193 @@
+# Раздел 4.7. Ходатайства, запросы и поручения
+documents:
+  - code: information_request
+    title: "Запрос о предоставлении сведений (документов)"
+    section: requests
+    kind: request
+    author: "Следователь"
+    stages: [check, investigation]
+    keywords: [запрос, истребовать, предоставить сведения, документы, организация]
+    legal_bases:
+      - {key: "upk:21", reason: "Обязательность требований, поручений и запросов следователя, предъявленных в пределах полномочий (ч. 4 ст. 21 УПК РФ)"}
+      - {key: "upk:86", reason: "Собирание доказательств (истребование документов)", mandatory: false}
+      - {key: "upk:144", reason: "Истребование документов и предметов при проверке сообщения (ч. 1 ст. 144 УПК РФ)", mandatory: false}
+    value_warnings:
+      secrecy:
+        "банковская тайна": "Сведения, составляющие банковскую тайну, предоставляются в порядке ст. 26 Федерального закона «О банках и банковской деятельности» (по делам, находящимся в производстве, при наличии согласия руководителя следственного органа). Проверьте соблюдение специального порядка."
+        "налоговая тайна": "Предоставление сведений, составляющих налоговую тайну, регулируется ст. 102 Налогового кодекса РФ. Проверьте основания."
+        "врачебная тайна": "Предоставление сведений, составляющих врачебную тайну, без согласия гражданина допускается в случаях, установленных ст. 13 Федерального закона «Об основах охраны здоровья граждан в Российской Федерации». Проверьте наличие оснований."
+        "тайна связи": "Информация о соединениях между абонентами и содержание переговоров получаются только на основании судебного решения (ст. 165, 186, 186.1 УПК РФ). Направление запроса без судебного решения недопустимо."
+    value_errors:
+      secrecy:
+        "тайна связи": "Для получения сведений, составляющих тайну связи, необходимо судебное решение. Используйте ходатайство о производстве следственного действия."
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - {key: subject, label: "Уголовное дело либо материал проверки (номер)", type: text, required: true, binding: case.case_number}
+      - {key: qualification, label: "Квалификация (признаки преступления)", type: text, binding: case.qualification}
+      - {key: requested, label: "Запрашиваемые сведения и документы (каждый пункт с новой строки)", type: list, required: true}
+      - {key: secrecy, label: "Охраняемая законом тайна", type: select, required: true, options: ["не относится", "банковская тайна", "налоговая тайна", "врачебная тайна", "тайна связи", "иная тайна (указать в тексте)"]}
+      - {key: due_date, label: "Срок предоставления ответа", type: date}
+      - {key: reply_to, label: "Адрес для ответа", type: text, required: true}
+    body: |
+      {{ m.letter_head() }}
+      {{ m.title("ЗАПРОС") }}
+      <p>В производстве {{ v.investigator_position }} {{ v.investigator_name }} находится {{ v.subject }}{% if has.qualification %}, по признакам преступления, предусмотренного {{ v.qualification }}{% endif %}.</p>
+      <p>На основании ч. 4 ст. 21 УПК РФ прошу предоставить следующие сведения (документы):</p>
+      <p class="pre">{{ v.requested }}</p>
+      <p>{% if has.due_date %}Ответ прошу направить в срок до {{ v.due_date }} по адресу: {{ v.reply_to }}.{% else %}Ответ прошу направить по адресу: {{ v.reply_to }}.{% endif %}</p>
+      <p>Требования, поручения и запросы следователя, предъявленные в пределах его полномочий, обязательны для исполнения всеми учреждениями, предприятиями, организациями, должностными лицами и гражданами (ч. 4 ст. 21 УПК РФ).</p>
+      {{ m.investigator_sign() }}
+
+  - code: inquiry_body_order
+    title: "Поручение органу дознания"
+    section: requests
+    kind: order
+    author: "Следователь"
+    stages: [investigation, suspended]
+    keywords: [поручение, орган дознания, ОРМ, оперативно-розыскные мероприятия, установить, розыск]
+    legal_bases:
+      - {key: "upk:38", reason: "Полномочие следователя давать органу дознания обязательные для исполнения письменные поручения (п. 4 ч. 2 ст. 38 УПК РФ)"}
+      - {key: "upk:152", reason: "Поручение производства следственных и розыскных действий в другом месте (ч. 1 ст. 152 УПК РФ)", mandatory: false}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_ref
+      - {key: summary, label: "Обстоятельства дела в объёме, необходимом для исполнения поручения", type: textarea, required: true, narrative: true}
+      - {key: tasks, label: "Поручаемые оперативно-розыскные мероприятия, следственные и иные процессуальные действия", type: list, required: true}
+      - {key: due_date, label: "Срок исполнения", type: date, required: true}
+    body: |
+      {{ m.letter_head() }}
+      {{ m.title("ПОРУЧЕНИЕ") }}
+      <p>В производстве {{ v.investigator_position }} {{ v.investigator_name }} находится уголовное дело № {{ v.case_number }}, возбуждённое по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.summary }}</p>
+      <p>На основании п. 4 ч. 2 ст. 38 УПК РФ поручаю:</p>
+      <p class="pre">{{ v.tasks }}</p>
+      <p>О результатах исполнения поручения прошу сообщить в срок до {{ v.due_date }}.</p>
+      {{ m.investigator_sign() }}
+
+  - code: investigator_order
+    title: "Поручение о производстве отдельных следственных действий"
+    section: requests
+    kind: order
+    author: "Следователь"
+    stages: [investigation]
+    keywords: [поручение следователю, отдельное поручение, в другом месте]
+    legal_bases:
+      - {key: "upk:152", reason: "Поручение производства следственных действий следователю или органу дознания; исполнение в срок не позднее 10 суток (ч. 1 ст. 152 УПК РФ)"}
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_ref
+      - {key: summary, label: "Обстоятельства дела в объёме, необходимом для исполнения", type: textarea, required: true, narrative: true}
+      - {key: actions, label: "Поручаемые следственные действия (с перечнем вопросов при допросе)", type: list, required: true}
+      - {key: enclosures, label: "Прилагаемые документы (копии постановлений и т. п.)", type: list}
+    body: |
+      {{ m.letter_head() }}
+      {{ m.title("ПОРУЧЕНИЕ", "о производстве отдельных следственных действий") }}
+      <p>В производстве {{ v.investigator_position }} {{ v.investigator_name }} находится уголовное дело № {{ v.case_number }}, возбуждённое по признакам преступления, предусмотренного {{ v.qualification }}.</p>
+      <p>{{ v.summary }}</p>
+      <p>Поскольку производство следственных действий необходимо в другом месте, руководствуясь ч. 1 ст. 152 УПК РФ, прошу произвести:</p>
+      <p class="pre">{{ v.actions }}</p>
+      <p>Поручение подлежит исполнению в срок не позднее 10 суток (ч. 1 ст. 152 УПК РФ).</p>
+      {% if has.enclosures %}<p>Приложение:</p><p class="pre">{{ v.enclosures }}</p>{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: cover_letter
+    title: "Сопроводительное письмо"
+    section: requests
+    kind: letter
+    author: "Следователь"
+    stages: [check, investigation, suspended, completed, terminated]
+    keywords: [сопроводительное письмо, направляю]
+    legal_bases: []
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - {key: body_text, label: "Текст письма (что и для чего направляется)", type: textarea, required: true}
+      - {key: attachments, label: "Приложения с количеством листов", type: list}
+    body: |
+      {{ m.letter_head() }}
+      <p>{{ v.body_text }}</p>
+      {% if has.attachments %}<p>Приложение:</p><p class="pre">{{ v.attachments }}</p>{% endif %}
+      {{ m.investigator_sign() }}
+
+  - code: petition_decision
+    title: "Постановление о результатах рассмотрения ходатайства"
+    section: requests
+    kind: resolution
+    author: "Следователь"
+    stages: [check, investigation, suspended, completed]
+    keywords: [ходатайство, удовлетворить, отказать в удовлетворении, рассмотрение ходатайства]
+    legal_bases:
+      - {key: "upk:119", reason: "Лица, имеющие право заявить ходатайство"}
+      - {key: "upk:121", reason: "Сроки рассмотрения ходатайства"}
+      - {key: "upk:122", reason: "Разрешение ходатайства"}
+      - {key: "upk:159", reason: "Обязательность рассмотрения ходатайства", mandatory: false}
+    warnings:
+      - "Ходатайство подлежит рассмотрению непосредственно после его заявления, а при невозможности — не позднее 3 суток со дня заявления (ст. 121 УПК РФ)."
+    fields:
+      - use: header
+      - use: case_number_only
+      - {key: applicant, label: "Лицо, заявившее ходатайство", type: participant, participant_role: "suspect|accused|defender|victim|representative|legal_representative|civil_plaintiff|civil_defendant|other", required: true}
+      - {key: petition_date, label: "Дата ходатайства", type: date, required: true}
+      - {key: petition_content, label: "Содержание ходатайства", type: textarea, required: true}
+      - {key: decision, label: "Решение", type: select, required: true, options: ["удовлетворить полностью", "удовлетворить частично", "отказать в удовлетворении"]}
+      - {key: reasons, label: "Мотивы принятого решения", type: textarea, required: true}
+    body: |
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о результатах рассмотрения ходатайства") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев ходатайство {{ pv('applicant', 'role_label') }} {{ pv('applicant', 'display_name') }} от {{ v.petition_date }} по уголовному делу № {{ v.case_number }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.petition_content }}</p>
+      <p>{{ v.reasons }}</p>
+      <p>Руководствуясь ст. 119–122 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>1. Ходатайство {{ v.decision }}.</p>
+      <p>2. О принятом решении уведомить заявителя, разъяснив, что решение может быть обжаловано в порядке, установленном главой 16 УПК РФ.</p>
+      {{ m.investigator_sign() }}
+
+  - code: legal_assistance_request
+    title: "Запрос о правовой помощи"
+    section: requests
+    kind: request
+    author: "Следователь"
+    addressee: "Компетентный орган иностранного государства (через уполномоченный центральный орган)"
+    stages: [investigation]
+    keywords: [международный запрос, правовая помощь, иностранное государство]
+    legal_bases:
+      - {key: "upk:453", reason: "Направление запроса о правовой помощи"}
+      - {key: "upk:454", reason: "Содержание и форма запроса"}
+    warnings:
+      - "Запрос направляется в порядке, установленном ст. 453 УПК РФ и применимым международным договором, через уполномоченный орган; подлежит переводу на официальный язык запрашиваемого государства (ст. 454 УПК РФ)."
+      - "Проверьте наличие международного договора либо возможность направления запроса на основе принципа взаимности."
+    fields:
+      - use: header
+      - {key: requesting_body, label: "Наименование органа, от которого исходит запрос", type: text, required: true, binding: case.investigative_body}
+      - {key: recipient, label: "Наименование и место нахождения органа, в который направляется запрос", type: text, required: true}
+      - {key: treaty, label: "Международный договор (соглашение) либо принцип взаимности", type: text, required: true}
+      - use: case_ref
+      - {key: nature, label: "Характер запроса (испрашиваемые процессуальные действия)", type: textarea, required: true}
+      - {key: persons, label: "Данные о лицах, в отношении которых направляется запрос (дата и место рождения, гражданство, род занятий, место жительства; для юридических лиц — наименование и место нахождения)", type: textarea, required: true}
+      - {key: to_establish, label: "Обстоятельства, подлежащие выяснению; перечень запрашиваемых документов и доказательств", type: textarea, required: true}
+      - {key: facts, label: "Фактические обстоятельства преступления", type: textarea, required: true, narrative: true}
+      - {key: article_text, label: "Текст статьи УК РФ", type: textarea, required: true, help: "Вставляется из проверенного правового справочника"}
+      - {key: harm, label: "Сведения о размере вреда (при необходимости)", type: text}
+    body: |
+      {{ m.title("ЗАПРОС", "о правовой помощи по уголовному делу № " ~ (raw.case_number or "")) }}
+      {{ m.place_date() }}
+      <p>1. Орган, от которого исходит запрос: {{ v.requesting_body }}.</p>
+      <p>2. Орган, в который направляется запрос: {{ v.recipient }}.</p>
+      <p>3. Основание: {{ v.treaty }}.</p>
+      <p>4. Уголовное дело № {{ v.case_number }}, возбуждённое по признакам преступления, предусмотренного {{ v.qualification }}. Характер запроса: {{ v.nature }}</p>
+      <p>5. Сведения о лицах: {{ v.persons }}</p>
+      <p>6. Обстоятельства, подлежащие выяснению, и запрашиваемые доказательства: {{ v.to_establish }}</p>
+      <p>7. Фактические обстоятельства преступления: {{ v.facts }}</p>
+      <p>8. Квалификация и текст статьи Уголовного кодекса Российской Федерации: {{ v.article_text }}</p>
+      {% if has.harm %}<p>9. Размер вреда: {{ v.harm }}</p>{% endif %}
+      {{ m.investigator_sign() }}
+      <p class="small">М.П. (гербовая печать)</p>

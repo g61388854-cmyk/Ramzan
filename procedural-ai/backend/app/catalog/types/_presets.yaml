@@ -1,0 +1,37 @@
+# Наборы общих полей. Подключаются в описании документа элементом `- use: <имя>`.
+# Общие поля не заменяют специальные поля конкретного вида документа.
+presets:
+  header:
+    - {key: doc_date, label: "Дата составления", type: date, required: true, binding: today, group: "Реквизиты"}
+    - {key: city, label: "Место составления (населённый пункт)", type: text, required: true, binding: case.city, group: "Реквизиты"}
+    - {key: investigator_position, label: "Должность, специальное звание (классный чин) следователя", type: text, required: true, binding: case.investigator_position, group: "Реквизиты", help: "Указывается полностью, с наименованием следственного органа"}
+    - {key: investigator_name, label: "Фамилия и инициалы следователя", type: text, required: true, binding: case.investigator_name, group: "Реквизиты"}
+  case_ref:
+    - {key: case_number, label: "Номер уголовного дела", type: text, required: true, binding: case.case_number, group: "Уголовное дело"}
+    - {key: qualification, label: "Квалификация (пункт, часть, статья УК РФ)", type: text, required: true, binding: case.qualification, group: "Уголовное дело", help: "Например: п. «в» ч. 2 ст. 158 УК РФ"}
+  case_number_only:
+    - {key: case_number, label: "Номер уголовного дела", type: text, required: true, binding: case.case_number, group: "Уголовное дело"}
+  head_ref:
+    - {key: head_position, label: "Должность руководителя следственного органа", type: text, required: true, binding: case.head_position, group: "Руководитель следственного органа"}
+    - {key: head_name, label: "Фамилия и инициалы руководителя следственного органа", type: text, required: true, binding: case.head_name, group: "Руководитель следственного органа"}
+  protocol_core:
+    - {key: doc_date, label: "Дата производства следственного действия", type: date, required: true, binding: today, group: "Реквизиты"}
+    - {key: city, label: "Населённый пункт", type: text, required: true, binding: case.city, group: "Реквизиты"}
+    - {key: place_of_action, label: "Место производства следственного действия", type: text, required: true, group: "Реквизиты", help: "Помещение, адрес; ч. 2 ст. 166 УПК РФ"}
+    - {key: time_start, label: "Время начала (часы, минуты)", type: time, required: true, group: "Реквизиты"}
+    - {key: time_end, label: "Время окончания (часы, минуты)", type: time, required: true, group: "Реквизиты"}
+    - {key: investigator_position, label: "Должность, специальное звание (классный чин) следователя", type: text, required: true, binding: case.investigator_position, group: "Реквизиты"}
+    - {key: investigator_name, label: "Фамилия и инициалы следователя", type: text, required: true, binding: case.investigator_name, group: "Реквизиты"}
+  protocol_participants:
+    - {key: other_participants, label: "Иные участвующие лица (процессуальное положение, фамилия, имя, отчество)", type: textarea, group: "Участники следственного действия", help: "Каждое лицо с новой строки; ч. 3 ст. 166 УПК РФ"}
+    - {key: understood_witnesses, label: "Понятые (фамилия, имя, отчество, адрес)", type: textarea, group: "Участники следственного действия", help: "Участие понятых определяется ч. 1 и 1.1 ст. 170 УПК РФ"}
+    - {key: technical_means, label: "Применяемые технические средства и их использование", type: textarea, group: "Участники следственного действия", help: "При неучастии понятых применение технических средств фиксации обязательно, если иное не предусмотрено ч. 3 ст. 170 УПК РФ"}
+  protocol_end:
+    - {key: participants_statements, label: "Заявления и замечания участвующих лиц", type: textarea, group: "Окончание", help: "Если заявлений не поступило, поле оставляется пустым — в протокол вносится отметка об их отсутствии"}
+    - {key: read_mode, label: "Способ ознакомления с протоколом", type: select, required: true, group: "Окончание", options: ["прочитан лично", "оглашён вслух следователем"]}
+  addressee:
+    - {key: addressee_org, label: "Адресат (наименование органа, организации)", type: text, required: true, group: "Адресат"}
+    - {key: addressee_person, label: "Должность и фамилия, инициалы должностного лица адресата", type: text, group: "Адресат"}
+    - {key: addressee_address, label: "Адрес адресата", type: text, group: "Адресат"}
+  outgoing:
+    - {key: out_number, label: "Исходящий номер", type: text, group: "Реквизиты"}

@@ -1,0 +1,24 @@
+{
+ "_comment": "Пороговые значения полноты и точности извлечения на синтетическом наборе. Пересматриваются при расширении набора.",
+ "recall": {
+  "person": 1.0,
+  "date": 1.0,
+  "birth_date": 1.0,
+  "incident_date": 1.0,
+  "money": 1.0,
+  "phone": 1.0,
+  "case_number": 1.0,
+  "legal_ref": 1.0,
+  "address": 1.0,
+  "expertise": 1.0,
+  "time": 1.0,
+  "action_time_range": 1.0,
+  "term": 1.0,
+  "seized_item": 1.0,
+  "doc_ref": 1.0,
+  "decision": 1.0,
+  "testimony": 1.0
+ },
+ "precision_min_overall": 0.85,
+ "doc_type_accuracy": 0.8
+}

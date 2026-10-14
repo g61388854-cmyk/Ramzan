@@ -1,0 +1,81 @@
+# PROCEDURAL AI — локальное развёртывание (режим Б: сервер в защищённой сети;
+# режим А: тот же состав на одном компьютере).
+# Перед запуском: скопируйте .env.example в .env и задайте секреты.
+name: procedural-ai
+
+services:
+  db:
+    image: postgres:16.4-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pai
+      POSTGRES_USER: pai
+      POSTGRES_PASSWORD: ${PAI_DB_PASSWORD:?задайте PAI_DB_PASSWORD в .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pai -d pai"]
+      interval: 10s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: procedural-ai:1.0.0
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PAI_DATABASE_URL: postgresql+psycopg2://pai:${PAI_DB_PASSWORD}@db/pai
+      PAI_STORAGE_KEY: ${PAI_STORAGE_KEY:?задайте PAI_STORAGE_KEY (base64, 32 байта)}
+      PAI_ADMIN_LOGIN: ${PAI_ADMIN_LOGIN:-admin}
+      PAI_ADMIN_PASSWORD: ${PAI_ADMIN_PASSWORD:?задайте первоначальный пароль администратора}
+      PAI_AI_PROVIDER: ${PAI_AI_PROVIDER:-none}
+      PAI_OLLAMA_URL: http://ollama:11434
+      PAI_OLLAMA_MODEL: ${PAI_OLLAMA_MODEL:-qwen2.5:7b-instruct}
+      PAI_SESSION_IDLE_MINUTES: ${PAI_SESSION_IDLE_MINUTES:-30}
+      PAI_MAX_UPLOAD_MB: ${PAI_MAX_UPLOAD_MB:-50}
+      PAI_TZ: ${PAI_TZ:-Europe/Moscow}
+      PAI_TRUSTED_PROXY: "*"
+    volumes:
+      - appdata:/data
+    networks: [internal]
+
+  proxy:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "${PAI_HTTPS_PORT:-443}:443"
+    environment:
+      PAI_HOSTNAME: ${PAI_HOSTNAME:-procedural-ai.local}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    networks: [internal, edge]
+
+  # Локальная языковая модель (необязательно). Запуск: docker compose --profile ai up -d
+  ollama:
+    image: ollama/ollama:0.3.14
+    profiles: ["ai"]
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+    networks: [internal]
+
+networks:
+  # Внутренняя сеть без выхода во внешние сети: БД, приложение и ИИ-модуль
+  # не имеют маршрута наружу, материалы дел не передаются во внешние сервисы.
+  internal:
+    internal: true
+  # Сеть публикации: только обратный прокси принимает подключения рабочих мест.
+  edge: {}
+
+volumes:
+  pgdata:
+  appdata:
+  caddydata:
+  ollama:

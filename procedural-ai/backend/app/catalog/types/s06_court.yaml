@@ -1,0 +1,168 @@
+# Раздел 4.6. Судебный контроль
+documents:
+  - code: court_action_petition
+    title: "Постановление о возбуждении перед судом ходатайства о производстве следственного действия"
+    section: court
+    kind: court_petition
+    author: "Следователь"
+    addressee: "Районный (гарнизонный военный) суд по месту производства предварительного следствия или следственного действия"
+    stages: [investigation]
+    requires_court: true
+    requires_head_consent: true
+    keywords: [судебное решение, обыск в жилище, контроль переговоров, соединения абонентов, ходатайство о производстве следственного действия, ст. 165]
+    legal_bases:
+      - {key: "upk:29", reason: "Полномочия суда в досудебном производстве (ч. 2 ст. 29 УПК РФ)"}
+      - {key: "upk:165", reason: "Судебный порядок получения разрешения на производство следственного действия"}
+      - {key: "upk:182", reason: "Обыск", mandatory: false}
+      - {key: "upk:183", reason: "Выемка", mandatory: false}
+      - {key: "upk:186", reason: "Контроль и запись переговоров", mandatory: false}
+      - {key: "upk:186.1", reason: "Получение информации о соединениях между абонентами", mandatory: false}
+    warnings:
+      - "Ходатайство рассматривается единолично судьёй не позднее 24 часов с момента его поступления (ч. 2 ст. 165 УПК РФ)."
+    fields:
+      - use: header
+      - use: head_ref
+      - use: case_ref
+      - {key: action, label: "Испрашиваемое следственное действие", type: select, required: true, options: ["осмотр жилища при отсутствии согласия проживающих в нём лиц", "обыск в жилище", "выемка в жилище", "личный обыск (за исключением случаев, предусмотренных ст. 93 УПК РФ)", "выемка предметов и документов, содержащих охраняемую федеральным законом тайну", "наложение ареста на почтово-телеграфные отправления, их осмотр и выемка", "контроль и запись телефонных и иных переговоров", "получение информации о соединениях между абонентами и (или) абонентскими устройствами", "иное следственное действие, требующее судебного решения"]}
+      - {key: action_other, label: "Наименование иного следственного действия и норма УПК РФ", type: text, required: true, condition: "action == 'иное следственное действие, требующее судебного решения'"}
+      - {key: object, label: "Объект (адрес жилища, лицо, абонентский номер, организация)", type: text, required: true}
+      - {key: circumstances, label: "Обстоятельства дела", type: textarea, required: true, narrative: true}
+      - {key: necessity, label: "Обоснование необходимости и данные, подтверждающие основания производства", type: textarea, required: true}
+      - {key: period, label: "Период (для контроля переговоров, информации о соединениях)", type: text, condition: "action in ['контроль и запись телефонных и иных переговоров', 'получение информации о соединениях между абонентами и (или) абонентскими устройствами']", required: true}
+      - {key: attachments, label: "Прилагаемые материалы", type: list, required: true}
+    body: |
+      {{ m.head_consent() }}
+      {{ m.title("ПОСТАНОВЛЕНИЕ", "о возбуждении перед судом ходатайства о производстве следственного действия") }}
+      {{ m.place_date() }}
+      <p>{{ vc.investigator_position }} {{ v.investigator_name }}, рассмотрев материалы уголовного дела № {{ v.case_number }}, возбуждённого по признакам преступления, предусмотренного {{ v.qualification }},</p>
+      <p class="center"><b>УСТАНОВИЛ:</b></p>
+      <p>{{ v.circumstances }}</p>
+      <p>{{ v.necessity }}</p>
+      <p>На основании изложенного, руководствуясь ч. 2 ст. 29 и ст. 165 УПК РФ,</p>
+      <p class="center"><b>ПОСТАНОВИЛ:</b></p>
+      <p>Возбудить перед судом ходатайство о разрешении производства следственного действия: {% if has.action_other %}{{ v.action_other }}{% else %}{{ v.action }}{% endif %} — {{ v.object }}{% if has.period %}, за период {{ v.period }}{% endif %}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: urgent_action_notice
+    title: "Уведомление судьи и прокурора о производстве следственного действия в случае, не терпящем отлагательства"
+    section: court
+    kind: notice
+    author: "Следователь"
+    addressee: "Судья; прокурор"
+    stages: [investigation]
+    requires_court: true
+    keywords: [не терпящий отлагательства, уведомление судьи, ч. 5 ст. 165]
+    legal_bases:
+      - {key: "upk:165", reason: "Уведомление судьи и прокурора о производстве следственного действия без судебного решения (ч. 5 ст. 165 УПК РФ)"}
+    warnings:
+      - "Уведомление направляется в срок, установленный ч. 5 ст. 165 УПК РФ, с приложением копий постановления и протокола следственного действия. Проверьте срок в действующей редакции нормы."
+    fields:
+      - use: header
+      - use: outgoing
+      - {key: court, label: "Суд (судья)", type: text, required: true}
+      - {key: prosecutor, label: "Прокурор", type: text, required: true}
+      - use: case_ref
+      - {key: action, label: "Произведённое следственное действие", type: text, required: true}
+      - {key: action_started, label: "Дата и время начала следственного действия", type: datetime, required: true}
+      - {key: urgency_reasons, label: "Обстоятельства, свидетельствующие о неотложности", type: textarea, required: true}
+      - {key: attachments, label: "Приложения (копии постановления и протокола)", type: list, required: true}
+    body: |
+      <table class="letter-head"><tr><td class="left small">{% if has.out_number %}Исх. № {{ v.out_number }}{% else %}Исх. № ________{% endif %}<br>от {{ v.doc_date }}</td><td class="right"><div class="addressee"><p>{{ v.court }}</p><p>{{ v.prosecutor }}</p></div></td></tr></table>
+      {{ m.title("УВЕДОМЛЕНИЕ", "о производстве следственного действия в случае, не терпящем отлагательства") }}
+      <p>В соответствии с ч. 5 ст. 165 УПК РФ уведомляю, что по уголовному делу № {{ v.case_number }}, возбуждённому по признакам преступления, предусмотренного {{ v.qualification }}, {{ v.action_started }} на основании постановления следователя без получения судебного решения произведено следственное действие: {{ v.action }}.</p>
+      <p>{{ v.urgency_reasons }}</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: annex_inventory
+    title: "Опись прилагаемых документов (материалов)"
+    section: court
+    kind: inventory
+    author: "Следователь"
+    stages: [check, investigation, suspended, completed]
+    keywords: [опись, приложение, перечень документов]
+    legal_bases: []
+    fields:
+      - use: header
+      - {key: to_document, label: "К какому документу прилагается опись", type: text, required: true}
+      - {key: items, label: "Документы: наименование, дата, количество листов (каждый с новой строки)", type: list, required: true}
+      - {key: total_pages, label: "Всего листов", type: number, required: true}
+    body: |
+      {{ m.title("ОПИСЬ", "документов, прилагаемых к документу: " ~ (raw.to_document or "")) }}
+      <p class="pre">{{ v.items }}</p>
+      <p>Всего: {{ v.total_pages }} л.</p>
+      {{ m.investigator_sign() }}
+      <p>{{ v.doc_date }}</p>
+
+  - code: court_cover_letter
+    title: "Сопроводительное письмо в суд"
+    section: court
+    kind: letter
+    author: "Следователь"
+    addressee: "Суд"
+    stages: [investigation]
+    keywords: [сопроводительное письмо в суд, направить в суд]
+    legal_bases: []
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_number_only
+      - {key: subject, label: "Направляемое ходатайство (постановление) и его дата", type: text, required: true}
+      - {key: attachments, label: "Приложения с количеством листов", type: list, required: true}
+    body: |
+      {{ m.letter_head() }}
+      <p>Направляю для рассмотрения {{ v.subject }} по уголовному делу № {{ v.case_number }}.</p>
+      <p>Приложение:</p>
+      <p class="pre">{{ v.attachments }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: court_decision_execution
+    title: "Сообщение об исполнении судебного решения"
+    section: court
+    kind: letter
+    author: "Следователь"
+    addressee: "Суд, вынесший решение"
+    stages: [investigation, suspended, completed]
+    keywords: [исполнение судебного решения]
+    legal_bases: []
+    fields:
+      - use: header
+      - use: outgoing
+      - use: addressee
+      - use: case_number_only
+      - {key: court_decision, label: "Судебное решение (вид, дата, номер материала)", type: text, required: true}
+      - {key: execution, label: "Сведения об исполнении", type: textarea, required: true}
+    body: |
+      {{ m.letter_head() }}
+      <p>Сообщаю, что {{ v.court_decision }}, вынесенное по уголовному делу № {{ v.case_number }}, исполнено: {{ v.execution }}</p>
+      {{ m.investigator_sign() }}
+
+  - code: court_decision_disagreement_report
+    title: "Рапорт прокурору о несогласии с судебным решением"
+    section: court
+    kind: report
+    author: "Следователь"
+    addressee: "Прокурор"
+    stages: [investigation]
+    keywords: [обжалование судебного решения, апелляционное представление, несогласие]
+    legal_bases: []
+    warnings:
+      - "Право апелляционного обжалования судебного решения принадлежит участникам, перечисленным в УПК РФ; документ является обращением следователя к прокурору для решения вопроса о внесении представления и не является жалобой в суд."
+    fields:
+      - use: header
+      - use: addressee
+      - use: case_number_only
+      - {key: court_decision, label: "Судебное решение (суд, дата, содержание)", type: text, required: true}
+      - {key: arguments, label: "Доводы о незаконности (необоснованности) решения", type: textarea, required: true}
+    body: |
+      {{ m.addressee_block() }}
+      {{ m.title("РАПОРТ") }}
+      <p>{{ v.court_decision }} по уголовному делу № {{ v.case_number }}.</p>
+      <p>Полагаю указанное решение незаконным (необоснованным) по следующим основаниям: {{ v.arguments }}</p>
+      <p>Прошу рассмотреть вопрос о его обжаловании в установленном порядке.</p>
+      {{ m.investigator_sign() }}
+      <p>{{ v.doc_date }}</p>

@@ -1,0 +1,5 @@
+# Необязательные локальные модули распознавания.
+# Tesseract подключается через системный пакет (tesseract-ocr, tesseract-ocr-rus).
+# PaddleOCR устанавливается отдельно при наличии ресурсов:
+# paddleocr
+# paddlepaddle

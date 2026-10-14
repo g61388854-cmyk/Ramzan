@@ -1,0 +1,72 @@
+{% macro place_date() -%}
+<table class="place-date"><tr><td>{{ v.city }}</td><td class="right">{{ vl.doc_date }}</td></tr></table>
+{%- endmacro %}
+
+{% macro title(name, subtitle=None) -%}
+<h1 class="doc-title">{{ name }}</h1>
+{% if subtitle %}<p class="doc-subtitle">{{ subtitle }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro sign(label, name) -%}
+<table class="sign"><tr><td class="sign-label">{{ label }}</td><td class="sign-line">_______________</td><td class="sign-name">{{ name }}</td></tr></table>
+{%- endmacro %}
+
+{% macro investigator_sign() -%}
+{{ sign(vc.investigator_position, v.investigator_name) }}
+{%- endmacro %}
+
+{% macro head_consent() -%}
+<div class="consent"><p class="right"><b>СОГЛАСЕН</b></p><p class="right">{{ v.head_position }}</p><p class="right">_______________ {{ v.head_name }}</p><p class="right">«___» ____________ 20__ г.</p></div>
+{%- endmacro %}
+
+{% macro head_approve() -%}
+<div class="consent"><p class="right"><b>УТВЕРЖДАЮ</b></p><p class="right">{{ v.head_position }}</p><p class="right">_______________ {{ v.head_name }}</p><p class="right">«___» ____________ 20__ г.</p></div>
+{%- endmacro %}
+
+{% macro protocol_head(name, subtitle=None) -%}
+{{ title(name, subtitle) }}
+<table class="place-date"><tr><td>{{ v.city }}</td><td class="right">{{ vl.doc_date }}</td></tr></table>
+<p class="small">Следственное действие начато в {{ v.time_start }}, окончено в {{ v.time_end }}.</p>
+<p class="small">Место производства: {{ v.place_of_action }}.</p>
+{%- endmacro %}
+
+{% macro protocol_participants_block() -%}
+{% if has.other_participants %}<p>С участием:</p><p class="pre">{{ v.other_participants }}</p>{% endif %}
+{% if has.understood_witnesses %}<p>В присутствии понятых:</p><p class="pre">{{ v.understood_witnesses }}</p>{% endif %}
+<p>Участвующим лицам разъяснены их права, ответственность, а также порядок производства следственного действия (ч. 5 ст. 164 УПК РФ).</p>
+{% if has.technical_means %}<p>Участвующие лица предупреждены о применении технических средств: {{ v.technical_means }}</p>{% else %}<p>Технические средства не применялись.</p>{% endif %}
+{%- endmacro %}
+
+{% macro protocol_end_block() -%}
+<p>Протокол {{ v.read_mode }}. {% if has.participants_statements %}Заявления и замечания участвующих лиц: {{ v.participants_statements }}{% else %}Заявлений и замечаний от участвующих лиц не поступило.{% endif %}</p>
+{%- endmacro %}
+
+{% macro addressee_block() -%}
+<div class="addressee"><p>{{ v.addressee_org }}</p>{% if has.addressee_person %}<p>{{ v.addressee_person }}</p>{% endif %}{% if has.addressee_address %}<p>{{ v.addressee_address }}</p>{% endif %}</div>
+{%- endmacro %}
+
+{% macro letter_head() -%}
+<table class="letter-head"><tr><td class="left small">{% if has.out_number %}Исх. № {{ v.out_number }}{% else %}Исх. № ________{% endif %}<br>от {{ v.doc_date }}</td><td class="right">{{ addressee_block() }}</td></tr></table>
+{%- endmacro %}
+
+{% macro participant_details(key) -%}
+{{ pv(key, 'display_name') }}{% if pval(key, 'birth_date') %}, {{ pv(key, 'birth_date') }} года рождения{% endif %}{% if pval(key, 'birth_place') %}, уроженец(-ка) {{ pv(key, 'birth_place') }}{% endif %}{% if pval(key, 'citizenship') %}, гражданство: {{ pv(key, 'citizenship') }}{% endif %}{% if pval(key, 'address_registration') %}, зарегистрирован(-а) по адресу: {{ pv(key, 'address_registration') }}{% endif %}{% if pval(key, 'address_actual') %}, проживает по адресу: {{ pv(key, 'address_actual') }}{% endif %}
+{%- endmacro %}
+
+{% macro participant_card(key) -%}
+<table class="card">
+<tr><td>Фамилия, имя, отчество</td><td>{{ pv(key, 'display_name') }}</td></tr>
+<tr><td>Дата рождения</td><td>{{ pv(key, 'birth_date') }}</td></tr>
+<tr><td>Место рождения</td><td>{{ pv(key, 'birth_place') }}</td></tr>
+<tr><td>Гражданство</td><td>{{ pv(key, 'citizenship') }}</td></tr>
+<tr><td>Место регистрации</td><td>{{ pv(key, 'address_registration') }}</td></tr>
+<tr><td>Место жительства</td><td>{{ pv(key, 'address_actual') }}</td></tr>
+<tr><td>Документ, удостоверяющий личность</td><td>{{ pv(key, 'identity_document') }}</td></tr>
+<tr><td>Место работы (учёбы), должность</td><td>{{ pv(key, 'occupation') }}</td></tr>
+<tr><td>Телефон</td><td>{{ pv(key, 'phone') }}</td></tr>
+</table>
+{%- endmacro %}
+
+{% macro rights_line(text) -%}
+<p class="rights">{{ text }}</p>
+{%- endmacro %}
