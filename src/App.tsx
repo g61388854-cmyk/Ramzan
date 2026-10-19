@@ -7,6 +7,7 @@ import { HistoryControls } from './ui/HistoryControls';
 import { UploadDropzone } from './ui/UploadDropzone';
 import { HudHints } from './ui/HudHints';
 import { Intro } from './ui/Intro';
+import { PlannerPanel } from './ui/PlannerPanel';
 import { useKeyboard } from './hooks/useKeyboard';
 
 export function App() {
@@ -36,6 +37,7 @@ export function App() {
       <HistoryControls />
       <Inspector />
       <HudHints />
+      <PlannerPanel />
       <Intro />
 
       <div className="grain-overlay" aria-hidden />

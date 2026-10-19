@@ -484,3 +484,170 @@ canvas {
   background: rgba(255, 255, 255, 0.14);
   border-radius: 4px;
 }
+
+/* ---------- liquid glass planner ---------- */
+.liquid-glass {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(128, 220, 255, 0.06)),
+    radial-gradient(circle at 18% 12%, rgba(110, 231, 255, 0.32), transparent 34%),
+    radial-gradient(circle at 82% 0%, rgba(255, 45, 140, 0.22), transparent 36%),
+    rgba(10, 18, 28, 0.42);
+  border: 1px solid rgba(225, 250, 255, 0.28);
+  box-shadow: 0 24px 80px rgba(0, 18, 36, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(1.75) contrast(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.75) contrast(1.05);
+}
+
+.planner-shell {
+  position: absolute;
+  right: 310px;
+  top: 18px;
+  width: min(440px, calc(100vw - 560px));
+  max-height: calc(100vh - 36px);
+  overflow: hidden;
+  z-index: 19;
+  padding: 22px;
+  border-radius: 30px;
+  isolation: isolate;
+}
+
+.planner-shell::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  opacity: 0.65;
+  background: conic-gradient(from 120deg, transparent, rgba(125, 239, 255, 0.45), transparent, rgba(255, 255, 255, 0.34), transparent);
+  filter: blur(18px);
+  animation: liquidSpin 10s linear infinite;
+}
+
+.planner-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,0.34), transparent 22%, transparent 65%, rgba(255,255,255,0.12));
+  mix-blend-mode: screen;
+}
+
+.liquid-orb {
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  border-radius: 44% 56% 64% 36% / 45% 38% 62% 55%;
+  filter: blur(2px);
+  opacity: 0.48;
+  animation: liquidBlob 8s ease-in-out infinite alternate;
+  z-index: -1;
+}
+
+.orb-a { left: -70px; top: 78px; background: rgba(81, 221, 255, 0.38); }
+.orb-b { right: -76px; bottom: -58px; background: rgba(255, 82, 168, 0.3); animation-delay: -3s; }
+
+.planner-hero { position: relative; }
+.planner-kicker {
+  color: #9eeeff;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  font-weight: 800;
+}
+.planner-hero h1 {
+  margin: 10px 0 10px;
+  font-size: clamp(25px, 3vw, 40px);
+  line-height: 0.98;
+  letter-spacing: -1.5px;
+}
+.planner-hero p {
+  margin: 0;
+  color: rgba(242, 250, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.chrono-card {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.chrono-head {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(242, 250, 255, 0.76);
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+.chrono-head strong { color: #d8fbff; }
+.chrono-stream { display: grid; gap: 10px; }
+.flow-block {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px 24px 18px 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.18);
+  animation: softFloat 4.8s ease-in-out infinite;
+}
+.flow-block:nth-child(2) { animation-delay: -1.2s; }
+.flow-block:nth-child(3) { animation-delay: -2.3s; }
+.flow-block time { color: #9eeeff; font-family: 'Courier Prime', monospace; font-size: 12px; }
+.flow-block b { display: block; font-size: 14px; }
+.flow-block span { display: block; margin-top: 3px; color: rgba(242, 250, 255, 0.64); font-size: 11.5px; }
+.flow-block.flow { border-radius: 28px 18px 26px 18px; }
+.flow-block.soft { border-radius: 20px 30px 18px 24px; }
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+.feature-chip {
+  min-height: 86px;
+  padding: 13px;
+  border-radius: 20px;
+  color: rgba(245, 252, 255, 0.9);
+  font-size: 12px;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  animation: glassPulse 3.6s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes liquidSpin { to { transform: rotate(360deg); } }
+@keyframes liquidBlob {
+  0% { transform: translate3d(0, 0, 0) scale(1); border-radius: 44% 56% 64% 36% / 45% 38% 62% 55%; }
+  100% { transform: translate3d(18px, -16px, 0) scale(1.08); border-radius: 62% 38% 42% 58% / 36% 58% 42% 64%; }
+}
+@keyframes softFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes glassPulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 0 0 rgba(126,239,255,0); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 12px 34px rgba(126,239,255,0.12); }
+}
+
+@media (max-width: 1120px) {
+  .planner-shell {
+    left: 244px;
+    right: 18px;
+    width: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .planner-shell {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    padding: 16px;
+  }
+  .feature-grid { grid-template-columns: 1fr; }
+  .planner-hero p { display: none; }
+}
