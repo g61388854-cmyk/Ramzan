@@ -16,3 +16,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 deploy/_fonts/
+
+# Демонстрационная сборка
+frontend/dist-demo/

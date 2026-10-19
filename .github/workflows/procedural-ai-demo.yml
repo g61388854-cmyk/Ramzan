@@ -1,0 +1,38 @@
+# Публикация демонстрационной (бессерверной) версии PROCEDURAL AI на GitHub Pages
+# в ветку gh-pages. Полная версия разворачивается локально (procedural-ai/deploy).
+name: PROCEDURAL AI demo (GitHub Pages)
+
+on:
+  push:
+    branches: [claude/immersive-investigation-board-gxfgrp]
+    paths: ["procedural-ai/frontend/**", ".github/workflows/procedural-ai-demo.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: procedural-ai/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build:demo
+      - name: Publish to gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist-demo
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Demo build ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages

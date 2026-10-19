@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { api } from "./lib/api";
+import { api, DEMO } from "./lib/api";
 import { match, navigate, useRoute } from "./lib/router";
 import { useSession } from "./lib/session";
 import { Badge, Button, Field, Modal, useToast } from "./components/ui";
@@ -95,6 +95,7 @@ function Shell() {
           <Button size="sm" onClick={() => setPwd(true)}>Пароль</Button>
           <Button size="sm" onClick={() => logout()}>Выход</Button>
         </header>
+        {DEMO ? <DemoBanner /> : null}
         <main className="content">{page}</main>
       </div>
       {pwd ? <PasswordModal forced={!!user?.must_change_password} onClose={() => setPwd(false)} /> : null}
@@ -129,5 +130,21 @@ function PasswordModal({ onClose, forced }: { onClose: () => void; forced: boole
         <Field label="Новый пароль" hint="Не менее 10 символов, строчные и прописные буквы, цифры"><input type="password" value={newP} onChange={(e) => setNew(e.target.value)} autoComplete="new-password" /></Field>
       </div>
     </Modal>
+  );
+}
+
+function DemoBanner() {
+  async function reset() {
+    if (!window.confirm("Вернуть демонстрационные данные к исходному состоянию? Внесённые изменения будут удалены.")) return;
+    const { resetDemo } = await import("./demo/server");
+    resetDemo();
+    window.location.hash = "/";
+    window.location.reload();
+  }
+  return (
+    <div className="notice warn small" style={{ borderRadius: 0, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      <span className="grow"><b>Демонстрационная версия.</b> Данные синтетические и хранятся только в этом браузере. Обработка DOCX/PDF/сканов, языковая модель, импорт норм и экспорт PDF доступны в полной версии с сервером.</span>
+      <Button size="sm" onClick={reset}>Сбросить демо-данные</Button>
+    </div>
   );
 }

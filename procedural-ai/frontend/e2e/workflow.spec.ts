@@ -9,7 +9,7 @@ async function shot(page: Page, name: string) {
 }
 
 async function login(page: Page) {
-  await page.goto("/");
+  await page.goto("./");
   await page.getByLabel("Логин").fill(LOGIN);
   await page.getByLabel("Пароль").fill(PASSWORD);
   await page.getByRole("button", { name: "Войти" }).click();
@@ -69,7 +69,8 @@ test("основной сценарий: дело → материалы → ф�
   // headless-сборка Chromium заменяет кириллические имена blob-загрузок на «download».
   const fs = await import("node:fs");
   const file = await (await download).path();
-  expect(fs.readFileSync(file!).subarray(0, 2).toString()).toBe("PK");
+  if (process.env.PAI_E2E_DEMO === "1") expect(fs.readFileSync(file!).toString()).toContain("ПОСТАНОВЛЕНИЕ");
+  else expect(fs.readFileSync(file!).subarray(0, 2).toString()).toBe("PK");
 
   await page.getByRole("link", { name: "Правовой справочник" }).click();
   await expect(page.getByText(/Дата последнего обновления справочника/)).toBeVisible();
@@ -86,7 +87,7 @@ test("основной сценарий: дело → материалы → ф�
 test("мобильная ширина: панели рабочего места переключаются вкладками", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 840 });
   await login(page);
-  await page.goto("/#/cases");
+  await page.goto("./#/cases");
   await page.getByRole("cell", { name: "12601690001000045" }).first().click();
   await page.getByRole("tab", { name: /Документы/ }).click();
   await page.locator("table.t tbody tr").first().click();

@@ -34,7 +34,14 @@ function detailText(detail: unknown): string {
   return "Ошибка запроса";
 }
 
+export const DEMO = import.meta.env.VITE_DEMO === "1";
+
 async function request<T>(method: string, path: string, body?: unknown, opts: { raw?: boolean } = {}): Promise<T> {
+  if (DEMO) {
+    // Демонстрационная версия: запросы обрабатываются в браузере (src/demo/server.ts)
+    const { demoRequest } = await import("../demo/server");
+    return (await demoRequest(method, path, body)) as T;
+  }
   const headers: Record<string, string> = {};
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
