@@ -134,8 +134,8 @@ function PasswordModal({ onClose, forced }: { onClose: () => void; forced: boole
 }
 
 function DemoBanner() {
+  const [confirming, setConfirming] = useState(false);
   async function reset() {
-    if (!window.confirm("Вернуть демонстрационные данные к исходному состоянию? Внесённые изменения будут удалены.")) return;
     const { resetDemo } = await import("./demo/server");
     resetDemo();
     window.location.hash = "/";
@@ -144,7 +144,13 @@ function DemoBanner() {
   return (
     <div className="notice warn small" style={{ borderRadius: 0, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
       <span className="grow"><b>Демонстрационная версия.</b> Данные синтетические и хранятся только в этом браузере. Обработка DOCX/PDF/сканов, языковая модель, импорт норм и экспорт PDF доступны в полной версии с сервером.</span>
-      <Button size="sm" onClick={reset}>Сбросить демо-данные</Button>
+      {confirming ? (
+        <>
+          <span>Внесённые изменения будут удалены.</span>
+          <Button size="sm" variant="danger" onClick={reset}>Сбросить</Button>
+          <Button size="sm" onClick={() => setConfirming(false)}>Отмена</Button>
+        </>
+      ) : <Button size="sm" onClick={() => setConfirming(true)}>Сбросить демо-данные</Button>}
     </div>
   );
 }
